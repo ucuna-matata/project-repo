@@ -1,3 +1,4 @@
+// frontend/src/services/auth.ts
 import apiClient from './api';
 
 export interface User {
@@ -9,17 +10,16 @@ export interface User {
 
 export const authService = {
   async getGoogleAuthUrl(): Promise<{ auth_url: string }> {
-    const response = await apiClient.get('/auth/google/start/');
-    return response.data;
+    const res = await apiClient.get('/auth/google/start');
+    return res.data;
   },
 
   async getCurrentUser(): Promise<User> {
-    const response = await apiClient.get('/auth/me/');
-    return response.data;
+    const res = await apiClient.get('/auth/me');
+    return res.data;
   },
 
   async logout(): Promise<void> {
-    await apiClient.post('/auth/logout/');
+    await apiClient.post('/auth/logout');
   },
 };
-

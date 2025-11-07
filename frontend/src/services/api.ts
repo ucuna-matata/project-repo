@@ -1,32 +1,25 @@
+// frontend/src/services/api.ts
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-export const apiClient = axios.create({
+const apiClient = axios.create({
   baseURL: `${API_URL}/api`,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true, // Important for cookie-based auth
+  headers: { 'Content-Type': 'application/json' },
+  withCredentials: true, // використовуємо cookie-сесію від Django
 });
 
-// Request interceptor for adding auth tokens or other headers
+// Можеш додати токени/хедери тут за потреби
 apiClient.interceptors.request.use(
-  (config) => {
-    // Add any custom headers here if needed
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (config) => config,
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor for handling errors globally
+// Глобальна обробка 401 -> /login
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Handle unauthorized - redirect to login
+    if (error.response?.status === 401 && window.location.pathname !== '/login') {
       window.location.href = '/login';
     }
     return Promise.reject(error);
@@ -34,4 +27,4 @@ apiClient.interceptors.response.use(
 );
 
 export default apiClient;
-
+export { apiClient };
