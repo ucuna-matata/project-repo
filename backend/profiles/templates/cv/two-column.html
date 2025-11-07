@@ -1,0 +1,206 @@
+{% extends "cv/base.html" %}
+
+{% block extra_styles %}
+<style>
+    .two-column-layout {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 30px;
+    }
+    
+    .sidebar {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+    }
+    
+    .sidebar h2 {
+        font-size: 14pt;
+        margin-top: 16px;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    .sidebar .section {
+        margin-bottom: 20px;
+    }
+    
+    .main-content {
+        padding-left: 10px;
+    }
+    
+    .contact-item {
+        margin-bottom: 8px;
+        font-size: 10pt;
+        word-break: break-word;
+    }
+    
+    .skill-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .skill-list li {
+        padding: 4px 0;
+        font-size: 10pt;
+    }
+    
+    @media print {
+        .two-column-layout {
+            display: grid;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="two-column-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <!-- Contact -->
+        <section class="section">
+            <h2>Contact</h2>
+            {% if personal.email %}
+            <div class="contact-item">
+                <strong>Email:</strong><br>
+                {{ personal.email }}
+            </div>
+            {% endif %}
+            {% if personal.phone %}
+            <div class="contact-item">
+                <strong>Phone:</strong><br>
+                {{ personal.phone }}
+            </div>
+            {% endif %}
+            {% if personal.location %}
+            <div class="contact-item">
+                <strong>Location:</strong><br>
+                {{ personal.location }}
+            </div>
+            {% endif %}
+        </section>
+        
+        <!-- Links -->
+        {% if links %}
+        <section class="section">
+            <h2>Links</h2>
+            {% if links.linkedin %}
+            <div class="contact-item">
+                <a href="{{ links.linkedin }}">LinkedIn</a>
+            </div>
+            {% endif %}
+            {% if links.github %}
+            <div class="contact-item">
+                <a href="{{ links.github }}">GitHub</a>
+            </div>
+            {% endif %}
+            {% if links.portfolio %}
+            <div class="contact-item">
+                <a href="{{ links.portfolio }}">Portfolio</a>
+            </div>
+            {% endif %}
+        </section>
+        {% endif %}
+        
+        <!-- Skills -->
+        {% if skills %}
+        <section class="section">
+            <h2>Skills</h2>
+            <ul class="skill-list">
+                {% for skill in skills %}
+                <li>• {{ skill }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <header>
+            <h1>{{ personal.name|default:"Your Name" }}</h1>
+        </header>
+        
+        <!-- Summary -->
+        {% if summary %}
+        <section class="section">
+            <div class="summary">{{ summary }}</div>
+        </section>
+        {% endif %}
+        
+        <!-- Experience -->
+        {% if experience %}
+        <section class="section">
+            <h2>Experience</h2>
+            {% for exp in experience %}
+            <div class="experience-item">
+                <div class="item-header">
+                    <h3 class="item-title">{{ exp.position|default:"Position" }}</h3>
+                    <span class="item-date">
+                        {% if exp.start_date %}{{ exp.start_date }}{% endif %}
+                        {% if exp.end_date %} - {{ exp.end_date }}{% else %} - Present{% endif %}
+                    </span>
+                </div>
+                <div class="item-subtitle">{{ exp.company|default:"Company" }}</div>
+                {% if exp.description %}
+                <div class="item-description">{{ exp.description }}</div>
+                {% endif %}
+                {% if exp.achievements %}
+                <ul class="achievements">
+                    {% for achievement in exp.achievements %}
+                    <li>{{ achievement }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </section>
+        {% endif %}
+        
+        <!-- Education -->
+        {% if education %}
+        <section class="section">
+            <h2>Education</h2>
+            {% for edu in education %}
+            <div class="education-item">
+                <div class="item-header">
+                    <h3 class="item-title">{{ edu.degree|default:"Degree" }}</h3>
+                    <span class="item-date">
+                        {% if edu.start_date %}{{ edu.start_date }}{% endif %}
+                        {% if edu.end_date %} - {{ edu.end_date }}{% endif %}
+                    </span>
+                </div>
+                <div class="item-subtitle">{{ edu.institution|default:"Institution" }}</div>
+                {% if edu.description %}
+                <div class="item-description">{{ edu.description }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </section>
+        {% endif %}
+        
+        <!-- Projects -->
+        {% if projects %}
+        <section class="section">
+            <h2>Projects</h2>
+            {% for project in projects %}
+            <div class="project-item">
+                <h3 class="item-title">{{ project.name|default:"Project Name" }}</h3>
+                {% if project.description %}
+                <div class="item-description">{{ project.description }}</div>
+                {% endif %}
+                {% if project.url %}
+                <div class="links">
+                    <a href="{{ project.url }}">View Project</a>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </section>
+        {% endif %}
+    </main>
+</div>
+
+<div class="footer">
+    Generated on {% now "Y-m-d" %}
+</div>
+{% endblock %}

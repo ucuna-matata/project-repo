@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/auth';
+import { Sparkles, Chrome, Mail, Lock } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -39,68 +40,109 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0f3b40]">
-      <div className="bg-[#0f3b40] p-8 rounded-lg w-full max-w-lg">
-        <div className="flex justify-center mb-10">
-          <div className="text-3xl font-bold text-white">Hirely</div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-primary-900 to-slate-900 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+      </div>
+
+      <div className="relative z-10 w-full max-w-md px-6 animate-scale-in">
+        {/* Logo/Brand */}
+        <div className="flex justify-center mb-12">
+          <div className="flex items-center gap-3 group">
+            <div className="bg-gradient-to-br from-primary-500 to-accent-500 p-3 rounded-2xl shadow-2xl group-hover:scale-110 transition-transform duration-300">
+              <Sparkles className="h-8 w-8 text-white" />
+            </div>
+            <span className="text-4xl font-bold text-white">Hirely</span>
+          </div>
         </div>
 
-        <div className="bg-[#0f3b40] border border-white/10 rounded-xl p-8 shadow-2xl">
-          <h1 className="text-2xl font-semibold text-white text-center mb-6">
-            Welcome to Hirely
+        {/* Main Card */}
+        <div className="glass-effect rounded-3xl p-8 shadow-2xl border border-white/10">
+          <h1 className="text-3xl font-bold text-white text-center mb-2">
+            Welcome Back
           </h1>
+          <p className="text-slate-300 text-center mb-8">
+            Sign in to continue your career journey
+          </p>
 
+          {/* Google Sign In */}
           <button
             onClick={handleGoogle}
             disabled={loading}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-md px-4 py-3 bg-white text-gray-800 font-medium hover:bg-gray-100 transition disabled:opacity-70"
+            className="w-full inline-flex items-center justify-center gap-3 rounded-xl px-6 py-4 bg-white text-slate-800 font-semibold hover:bg-slate-50 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
           >
-            {/* Google icon */}
-            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-              <path fill="#EA4335" d="M12 10.2v3.84h5.46c-.24 1.26-1.47 3.69-5.46 3.69A6.32 6.32 0 0 1 5.7 11.4a6.32 6.32 0 0 1 6.3-6.33c1.8 0 3.02.78 3.72 1.44l2.53-2.45C16.9 2.5 14.66 1.6 12 1.6 6.98 1.6 2.96 5.62 2.96 10.64S6.98 19.68 12 19.68c7.2 0 8.64-5.02 8.64-7.53 0-.5-.05-.86-.12-1.22H12z"/>
-            </svg>
+            <Chrome className="h-5 w-5" />
             {loading ? 'Redirecting…' : 'Continue with Google'}
           </button>
 
-          <form className="mt-6 space-y-4" onSubmit={handleContinue}>
-            <input
-              type="email"
-              placeholder="Enter email or username"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-md bg-white/10 text-white placeholder-white/60 px-4 py-3 outline-none border border-white/10 focus:border-white/30"
-            />
-            <input
-              type="password"
-              placeholder="Enter password"
-              value={pwd}
-              onChange={(e) => setPwd(e.target.value)}
-              className="w-full rounded-md bg-white/10 text-white placeholder-white/60 px-4 py-3 outline-none border border-white/10 focus:border-white/30"
-            />
+          {/* Divider */}
+          <div className="flex items-center gap-4 my-8">
+            <div className="flex-1 h-px bg-white/20"></div>
+            <span className="text-slate-400 text-sm font-medium">or</span>
+            <div className="flex-1 h-px bg-white/20"></div>
+          </div>
+
+          {/* Email/Password Form */}
+          <form className="space-y-4" onSubmit={handleContinue}>
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+              <input
+                type="email"
+                placeholder="Enter email or username"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-xl bg-white/10 text-white placeholder-slate-400 pl-12 pr-4 py-4 outline-none border border-white/20 focus:border-primary-400 focus:bg-white/15 transition-all duration-200"
+              />
+            </div>
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+              <input
+                type="password"
+                placeholder="Enter password"
+                value={pwd}
+                onChange={(e) => setPwd(e.target.value)}
+                className="w-full rounded-xl bg-white/10 text-white placeholder-slate-400 pl-12 pr-4 py-4 outline-none border border-white/20 focus:border-primary-400 focus:bg-white/15 transition-all duration-200"
+              />
+            </div>
 
             <button
               type="submit"
-              className="w-full rounded-md px-4 py-3 bg-black text-white font-medium hover:bg-black/90 transition"
+              className="w-full rounded-xl px-6 py-4 bg-gradient-to-r from-primary-600 to-accent-600 text-white font-semibold hover:from-primary-700 hover:to-accent-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
               Continue
             </button>
           </form>
 
+          {/* Error Message */}
           {msg && (
-            <p className="mt-4 text-sm text-center text-red-300">{msg}</p>
+            <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+              <p className="text-sm text-red-300 text-center">{msg}</p>
+            </div>
           )}
 
-          <p className="mt-6 text-center text-sm text-white/70">
-            Already have an account?{' '}
-            <a href="/login" className="text-white underline underline-offset-2">
-              Sign in
+          {/* Footer Links */}
+          <p className="mt-8 text-center text-sm text-slate-400">
+            Don't have an account?{' '}
+            <a href="/login" className="text-primary-400 hover:text-primary-300 font-semibold underline underline-offset-2 transition-colors">
+              Sign up
             </a>
             {' '}•{' '}
-            <a href="#" className="text-white/70 cursor-not-allowed">
-              Sign up
+            <a href="#" className="text-slate-500 hover:text-slate-400 cursor-not-allowed transition-colors">
+              Forgot password?
             </a>
           </p>
         </div>
+
+        {/* Bottom Text */}
+        <p className="mt-8 text-center text-sm text-slate-400">
+          By continuing, you agree to our{' '}
+          <a href="#" className="text-primary-400 hover:text-primary-300 transition-colors">Terms</a>
+          {' '}and{' '}
+          <a href="#" className="text-primary-400 hover:text-primary-300 transition-colors">Privacy Policy</a>
+        </p>
       </div>
     </div>
   );

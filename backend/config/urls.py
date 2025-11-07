@@ -22,10 +22,10 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('authz.urls')),
-    path('api/', include('profiles.urls')),
     path('api/interview/', include('interview.urls')),
     path('api/trainer/', include('trainer.urls')),
     path('api/files/', include('files.urls')),
+    path('api/', include('profiles.urls')),  # Most generic, should be last
 ]
 
 if settings.DEBUG:

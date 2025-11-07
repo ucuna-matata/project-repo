@@ -163,3 +163,118 @@ class ExportTests(TestCase):
         self.assertEqual(response.data['user']['email'], 'export@example.com')
         self.assertEqual(len(response.data['cvs']), 1)
 
+
+class CVExportTests(TestCase):
+    """Test CV export to PDF and DOCX."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            email='cvexport@example.com',
+            google_sub='google999'
+        )
+        Profile.objects.create(user=self.user, summary='Test profile')
+        self.cv = CV.objects.create(
+            user=self.user,
+            title='Test Export CV',
+            template_key='clean',
+            sections={
+                'personal': {
+                    'name': 'Test User',
+                    'email': 'test@example.com',
+                    'phone': '+1 555-1234',
+                    'location': 'Test City'
+                },
+                'summary': 'Test summary',
+                'experience': [
+                    {
+                        'position': 'Developer',
+                        'company': 'Test Corp',
+                        'start_date': '2020-01',
+                        'end_date': None,
+                        'description': 'Test description',
+                        'achievements': ['Achievement 1', 'Achievement 2']
+                    }
+                ],
+                'education': [
+                    {
+                        'degree': 'BS Computer Science',
+                        'institution': 'Test University',
+                        'start_date': '2016-09',
+                        'end_date': '2020-05'
+                    }
+                ],
+                'skills': ['Python', 'Django', 'React'],
+                'projects': [],
+                'links': {
+                    'github': 'https://github.com/testuser',
+                    'linkedin': 'https://linkedin.com/in/testuser'
+                }
+            }
+        )
+        self.client.force_authenticate(user=self.user)
+
+    def test_export_cv_pdf(self):
+        """Test exporting CV as PDF."""
+        url = f'/api/cvs/{self.cv.id}/export/'
+        response = self.client.post(url, {'format': 'pdf'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # Verify response structure
+        self.assertIn('download_url', response.data)
+        self.assertIn('expires_at', response.data)
+        self.assertIn('format', response.data)
+        self.assertIn('filename', response.data)
+        
+        # Verify format
+        self.assertEqual(response.data['format'], 'pdf')
+        self.assertTrue(response.data['filename'].endswith('.pdf'))
+
+    def test_export_cv_docx(self):
+        """Test exporting CV as DOCX."""
+        url = f'/api/cvs/{self.cv.id}/export/'
+        response = self.client.post(url, {'format': 'docx'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # Verify response structure
+        self.assertIn('download_url', response.data)
+        self.assertIn('expires_at', response.data)
+        self.assertIn('format', response.data)
+        self.assertIn('filename', response.data)
+        
+        # Verify format
+        self.assertEqual(response.data['format'], 'docx')
+        self.assertTrue(response.data['filename'].endswith('.docx'))
+
+    def test_export_cv_invalid_format(self):
+        """Test exporting CV with invalid format."""
+        url = f'/api/cvs/{self.cv.id}/export/'
+        response = self.client.post(url, {'format': 'invalid'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('error', response.data)
+
+    def test_export_cv_not_owner(self):
+        """Test exporting CV that doesn't belong to user."""
+        other_user = User.objects.create_user(
+            email='other@example.com',
+            google_sub='google888'
+        )
+        other_cv = CV.objects.create(
+            user=other_user,
+            title='Other CV',
+            template_key='clean',
+            sections={}
+        )
+        
+        url = f'/api/cvs/{other_cv.id}/export/'
+        response = self.client.post(url, {'format': 'pdf'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_export_cv_unauthenticated(self):
+        """Test exporting CV without authentication."""
+        self.client.force_authenticate(user=None)
+        url = f'/api/cvs/{self.cv.id}/export/'
+        response = self.client.post(url, {'format': 'pdf'}, format='json')
+        # DRF returns 403 Forbidden for unauthenticated requests with IsAuthenticated permission
+        self.assertIn(response.status_code, [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN])
+

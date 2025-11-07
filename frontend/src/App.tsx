@@ -8,6 +8,7 @@ import Interview from './pages/Interview';
 import Trainer from './pages/Trainer';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
+import AuthCallback from './pages/AuthCallback';
 import Layout from './components/layout/Layout';
 import { useQuery } from '@tanstack/react-query';
 import { authService } from './services/auth';
@@ -22,7 +23,20 @@ function PrivateRoute() {
     queryKey: ['me'],
     queryFn: authService.getCurrentUser,
   });
-  if (isLoading) return <div className="p-8">Loading…</div>;
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <div className="text-center">
+          <div className="inline-flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+          </div>
+          <p className="text-lg text-slate-600 font-medium">Loading your workspace...</p>
+        </div>
+      </div>
+    );
+  }
+  
   if (isError) return <Navigate to="/login" replace />;
   return <Outlet />;
 }
@@ -33,6 +47,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
 
           <Route element={<PrivateRoute />}>
             <Route element={<Layout />}>

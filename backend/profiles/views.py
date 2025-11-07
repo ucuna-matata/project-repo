@@ -212,6 +212,70 @@ def erase_data(request):
         )
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def cv_export(request, cv_id):
+    """Export CV to PDF or DOCX format."""
+    from .services.export_service import CVExportService
+    from .services.storage_service import StorageService
+    from datetime import datetime, timedelta
+    
+    # Get CV and verify ownership
+    cv = get_object_or_404(CV, id=cv_id, user=request.user)
+    
+    # Get format from query params or request data (support both)
+    export_format = request.query_params.get('format') or request.data.get('format', 'pdf')
+    export_format = export_format.lower()
+    
+    if export_format not in ['pdf', 'docx']:
+        return Response(
+            {'error': 'Invalid format. Use "pdf" or "docx".'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        # Generate file
+        if export_format == 'pdf':
+            file_bytes, filename = CVExportService.generate_pdf(cv)
+        else:
+            file_bytes, filename = CVExportService.generate_docx(cv)
+        
+        # Save to storage
+        storage = StorageService()
+        file_path, download_url = storage.save_file(file_bytes, filename)
+        
+        # Calculate expiry time (1 hour from now)
+        expires_at = timezone.now() + timedelta(hours=1)
+        
+        # Create audit event
+        AuditEvent.objects.create(
+            user=request.user,
+            type='cv_export',
+            payload={
+                'cv_id': str(cv.id),
+                'format': export_format,
+                'filename': filename
+            }
+        )
+        
+        return Response({
+            'download_url': download_url,
+            'expires_at': expires_at.isoformat(),
+            'format': export_format,
+            'filename': filename
+        })
+        
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error exporting CV {cv_id}: {e}", exc_info=True)
+        
+        return Response(
+            {'error': f'Export failed: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def health_check(request):

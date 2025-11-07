@@ -1,0 +1,114 @@
+{% extends "cv/base.html" %}
+
+{% block content %}
+<!-- Personal Information -->
+<header>
+    <h1>{{ personal.name|default:"Your Name" }}</h1>
+    <div class="contact-info">
+        {% if personal.email %}<span>{{ personal.email }}</span> • {% endif %}
+        {% if personal.phone %}<span>{{ personal.phone }}</span> • {% endif %}
+        {% if personal.location %}<span>{{ personal.location }}</span>{% endif %}
+    </div>
+    {% if links %}
+    <div class="links">
+        {% if links.linkedin %}<a href="{{ links.linkedin }}">LinkedIn</a>{% endif %}
+        {% if links.github %}<a href="{{ links.github }}">GitHub</a>{% endif %}
+        {% if links.portfolio %}<a href="{{ links.portfolio }}">Portfolio</a>{% endif %}
+    </div>
+    {% endif %}
+</header>
+
+<!-- Summary -->
+{% if summary %}
+<section class="section">
+    <div class="summary">{{ summary }}</div>
+</section>
+{% endif %}
+
+<!-- Experience -->
+{% if experience %}
+<section class="section">
+    <h2>Experience</h2>
+    {% for exp in experience %}
+    <div class="experience-item">
+        <div class="item-header">
+            <h3 class="item-title">{{ exp.position|default:"Position" }}</h3>
+            <span class="item-date">
+                {% if exp.start_date %}{{ exp.start_date }}{% endif %}
+                {% if exp.end_date %} - {{ exp.end_date }}{% else %} - Present{% endif %}
+            </span>
+        </div>
+        <div class="item-subtitle">{{ exp.company|default:"Company" }}</div>
+        {% if exp.description %}
+        <div class="item-description">{{ exp.description }}</div>
+        {% endif %}
+        {% if exp.achievements %}
+        <ul class="achievements">
+            {% for achievement in exp.achievements %}
+            <li>{{ achievement }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    {% endfor %}
+</section>
+{% endif %}
+
+<!-- Education -->
+{% if education %}
+<section class="section">
+    <h2>Education</h2>
+    {% for edu in education %}
+    <div class="education-item">
+        <div class="item-header">
+            <h3 class="item-title">{{ edu.degree|default:"Degree" }}</h3>
+            <span class="item-date">
+                {% if edu.start_date %}{{ edu.start_date }}{% endif %}
+                {% if edu.end_date %} - {{ edu.end_date }}{% endif %}
+            </span>
+        </div>
+        <div class="item-subtitle">{{ edu.institution|default:"Institution" }}</div>
+        {% if edu.description %}
+        <div class="item-description">{{ edu.description }}</div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</section>
+{% endif %}
+
+<!-- Skills -->
+{% if skills %}
+<section class="section">
+    <h2>Skills</h2>
+    <div class="skills-container">
+        {% for skill in skills %}
+        <span class="skill-tag">{{ skill }}</span>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- Projects -->
+{% if projects %}
+<section class="section">
+    <h2>Projects</h2>
+    {% for project in projects %}
+    <div class="project-item">
+        <h3 class="item-title">{{ project.name|default:"Project Name" }}</h3>
+        {% if project.description %}
+        <div class="item-description">{{ project.description }}</div>
+        {% endif %}
+        {% if project.url %}
+        <div class="links">
+            <a href="{{ project.url }}">View Project</a>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</section>
+{% endif %}
+
+<div class="footer">
+    Generated on {% now "Y-m-d" %}
+</div>
+{% endblock %}
