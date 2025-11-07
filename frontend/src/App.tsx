@@ -18,7 +18,10 @@ const queryClient = new QueryClient({
 });
 
 function PrivateRoute() {
-  const { isLoading, isError } = useQuery(['me'], authService.getCurrentUser);
+  const { isLoading, isError } = useQuery({
+    queryKey: ['me'],
+    queryFn: authService.getCurrentUser,
+  });
   if (isLoading) return <div className="p-8">Loading…</div>;
   if (isError) return <Navigate to="/login" replace />;
   return <Outlet />;

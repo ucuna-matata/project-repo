@@ -1,11 +1,9 @@
 // frontend/src/pages/Login.tsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { authService } from '../services/auth';
 
 export default function Login() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [pwd, setPwd] = useState('');

@@ -34,6 +34,9 @@ const resources = {
         title: 'Skills Trainer',
         start: 'Start Quiz',
       },
+      settings: {
+        title: 'Settings',
+      },
       common: {
         save: 'Save',
         cancel: 'Cancel',
@@ -74,6 +77,9 @@ const resources = {
       trainer: {
         title: 'Тренер навичок',
         start: 'Почати тест',
+      },
+      settings: {
+        title: 'Налаштування',
       },
       common: {
         save: 'Зберегти',

@@ -4,7 +4,6 @@ Security middleware for rate limiting and additional protections.
 from django.core.cache import cache
 from django.http import JsonResponse
 from django.conf import settings
-import time
 
 
 class RateLimitMiddleware:
@@ -78,15 +77,4 @@ class SecurityHeadersMiddleware:
             )
         
         return response
-[pytest]
-DJANGO_SETTINGS_MODULE = config.settings
-python_files = tests.py test_*.py *_tests.py
-python_classes = Test*
-python_functions = test_*
-addopts = 
-    --verbose
-    --tb=short
-    --strict-markers
-    --disable-warnings
-testpaths = .
 
