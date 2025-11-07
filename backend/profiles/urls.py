@@ -9,5 +9,6 @@ urlpatterns = [
     path('cvs/<uuid:cv_id>', views.cv_detail, name='cv_detail'),
     path('export', views.export_data, name='export_data'),
     path('erase', views.erase_data, name='erase_data'),
+    path('healthz', views.health_check, name='health_check'),
 ]
 

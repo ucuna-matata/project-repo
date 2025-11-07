@@ -212,52 +212,9 @@ def erase_data(request):
         )
 
 
-@api_view(['GET', 'PUT'])
-def profile_detail(request):
-    """Get or update user profile"""
-    return Response({'message': 'Profile endpoint - implementation pending'})
-
-
-@api_view(['GET'])
-def cv_list(request):
-    """List all CVs for current user"""
-    return Response({'results': [], 'message': 'CV list - implementation pending'})
-
-
-@api_view(['GET', 'PUT', 'DELETE'])
-def cv_detail(request, pk):
-    """Get, update or delete a specific CV"""
-    return Response({'message': f'CV {pk} - implementation pending'})
-
-
-@api_view(['POST'])
-def cv_export(request, pk):
-    """Export CV to PDF or DOCX"""
-    format_type = request.query_params.get('format', 'pdf')
-    return Response({'message': f'CV {pk} export as {format_type} - implementation pending'})
-
-
-@api_view(['POST'])
-def cv_generate(request):
-    """Generate CV content using LLM"""
-    return Response({'message': 'CV generation - implementation pending'})
-
-
-@api_view(['POST'])
-def export_data(request):
-    """Export all user data as JSON"""
-    return Response({'message': 'Data export - implementation pending'})
-
-
-@api_view(['POST'])
-def erase_data(request):
-    """Erase all user data (GDPR)"""
-    return Response({'message': 'Data erasure - implementation pending'})
-
-
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def health_check(request):
     """Health check endpoint"""
-    return Response({'status': 'ok'})
+    return Response({'status': 'ok', 'timestamp': timezone.now().isoformat()})
 
