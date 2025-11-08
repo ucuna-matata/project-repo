@@ -107,7 +107,7 @@ export default function InterviewResults() {
       </div>
 
       {/* Score Card */}
-      <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 mb-8 text-white">
+      <div className="bg-gradient-to-r from-[#226A74] to-[#5699A2] rounded-lg shadow-lg p-6 mb-8 text-white">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-blue-100 text-sm font-medium">Overall Score</p>
@@ -242,7 +242,7 @@ export default function InterviewResults() {
               const answer = answers?.find(a => a.question_id === review.question_id);
 
               return (
-                <div key={review.question_id} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+                <div key={review.question_id} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-[#226A74]">
                   <div className="mb-4">
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="text-lg font-semibold text-gray-900">
@@ -294,7 +294,7 @@ export default function InterviewResults() {
           <button
             onClick={handleRetake}
             disabled={isRetaking}
-            className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="px-6 py-3 bg-[#226A74] text-white rounded-lg hover:bg-[#1B575F] font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             <RefreshCw className={`h-5 w-5 ${isRetaking ? 'animate-spin' : ''}`} />
             {isRetaking ? 'Starting...' : 'Try Again (Retake)'}
@@ -302,7 +302,7 @@ export default function InterviewResults() {
         )}
         <button
           onClick={() => navigate('/interview')}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+          className="px-6 py-3 bg-[#226A74] text-white rounded-lg hover:bg-[#1B575F] font-medium transition-all"
         >
           Start New Interview
         </button>
