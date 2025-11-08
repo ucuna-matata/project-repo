@@ -50,7 +50,6 @@ services:
     name: hirely-frontend
     runtime: static
     plan: free
-    region: frankfurt
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: ./frontend/dist
     routes:
