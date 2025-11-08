@@ -266,7 +266,7 @@ export default function CVBuilder({ initialData, cvId, onSave, onGenerate }: CVB
                     achievements: [],
                   })
                 }
-                className="inline-flex items-center px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="inline-flex items-center px-3 py-1 text-sm bg-[#226A74] text-white rounded-md hover:bg-[#1B575F]"
               >
                 <Plus className="h-4 w-4 mr-1" />
                 Add Experience
@@ -597,7 +597,7 @@ export default function CVBuilder({ initialData, cvId, onSave, onGenerate }: CVB
             <button
               type="submit"
               disabled={isSaving}
-              className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-[#226A74] text-white rounded-md hover:bg-[#1B575F] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSaving ? (
                 <>
@@ -617,7 +617,7 @@ export default function CVBuilder({ initialData, cvId, onSave, onGenerate }: CVB
                 type="button"
                 onClick={handleGenerate}
                 disabled={isGenerating}
-                className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-[#226A74] text-white rounded-md hover:bg-[#1B575F] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isGenerating ? (
                   <>
