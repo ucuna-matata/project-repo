@@ -20,7 +20,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.http import JsonResponse
 
-from django.urls import path
 from interview.llama_api import ask_llama
 
 def health_check(request):
