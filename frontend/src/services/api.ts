@@ -186,6 +186,18 @@ export async function submitInterview(sessionId: string) {
   });
   return handleResponse(res);
 }
+export async function getTrainerCategories() {
+  const res = await fetch(`${API_ORIGIN}/api/trainer/categories/`, {
+    credentials: 'include',
+  });
+  return handleResponse(res);
+}
+export async function getTrainerQuestions(category: string, n: number = 10) {
+  const res = await fetch(`${API_ORIGIN}/api/trainer/questions/${category}/?n=${n}`, {
+    credentials: 'include',
+  });
+  return handleResponse(res);
+}
 export async function startTrainerAttempt(payload: any) {
   const res = await fetch(`${API_ORIGIN}/api/trainer/start`, {
     method: 'POST',
@@ -247,6 +259,21 @@ export async function uploadFile(file: File) {
     credentials: 'include',
     headers,
     body: formData,
+  });
+  return handleResponse(res);
+}
+export async function healthCheck() {
+  const res = await fetch(`${API_ORIGIN}/api/healthz/`, {
+    credentials: 'include',
+  });
+  return handleResponse(res);
+}
+export async function askLlama(payload: { prompt: string }) {
+  const res = await fetch(`${API_ORIGIN}/ask-llama/`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: jsonHeaders(),
+    body: JSON.stringify(payload),
   });
   return handleResponse(res);
 }

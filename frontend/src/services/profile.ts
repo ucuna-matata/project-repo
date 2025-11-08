@@ -89,6 +89,10 @@ export const profileService = {
     return api.exportCV(id, format);
   },
 
+  async generateCV(data: any, signal?: AbortSignal): Promise<CV> {
+    return api.generateCV(data, signal);
+  },
+
   async exportAllData(): Promise<any> {
     return api.exportProfile();
   },
