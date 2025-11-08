@@ -251,6 +251,171 @@ def export_data(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+def generate_cv_with_ai(request):
+    """Generate CV content using AI based on profile data."""
+    from .services.cv_ai_service import generate_cv_content
+
+    # Get profile
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+
+    # Get job description from request if provided
+    job_description = request.data.get('job_description', '')
+    cv_title = request.data.get('title', 'AI Generated CV')
+    template_key = request.data.get('template_key', 'modern')
+
+    # Prepare profile data for AI
+    profile_data = {
+        'full_name': profile.full_name or request.user.get_full_name() or request.user.email,
+        'email': request.user.email,
+        'experience': profile.experience or [],
+        'education': profile.education or [],
+        'skills': profile.skills or [],
+        'projects': profile.projects or [],
+        'summary': profile.summary or '',
+        'links': profile.links or {}
+    }
+
+    # Generate CV content with AI
+    generated_content = generate_cv_content(profile_data, job_description)
+
+    # Check for errors
+    if 'error' in generated_content:
+        return Response(
+            {'error': generated_content['error'], 'message': generated_content.get('message', '')},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
+
+    # Process skills format
+    skills_data = generated_content.get('skills', {})
+    if isinstance(skills_data, dict):
+        # Convert categorized skills to flat list with categories
+        all_skills = []
+        for category, skill_list in skills_data.items():
+            for skill in skill_list:
+                all_skills.append({
+                    'name': skill,
+                    'category': category.title(),
+                    'level': 'intermediate'  # Default level
+                })
+        skills_data = all_skills
+
+    # Create CV with generated content
+    cv_sections = {
+        'personal': {
+            'name': profile_data['full_name'],
+            'email': profile_data['email'],
+            'phone': '',
+            'location': '',
+            'links': profile_data['links']
+        },
+        'summary': generated_content.get('summary', ''),
+        'experience': generated_content.get('experience', []),
+        'education': profile_data['education'],  # Keep original education
+        'skills': skills_data,
+        'projects': generated_content.get('projects', []),
+        'languages': [],
+        'certifications': []
+    }
+
+    # Create new CV
+    cv = CV.objects.create(
+        user=request.user,
+        title=cv_title,
+        template_key=template_key,
+        sections=cv_sections
+    )
+
+    # Create audit event
+    AuditEvent.objects.create(
+        user=request.user,
+        type='cv_ai_generate',
+        payload={
+            'cv_id': str(cv.id),
+            'title': cv_title,
+            'has_job_description': bool(job_description)
+        }
+    )
+
+    return Response(CVSerializer(cv).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def enhance_cv_section_with_ai(request, cv_id):
+    """Enhance a specific CV section using AI."""
+    from .services.cv_ai_service import enhance_cv_section
+
+    cv = get_object_or_404(CV, id=cv_id, user=request.user)
+
+    section_name = request.data.get('section')
+    context = request.data.get('context', '')
+
+    if not section_name:
+        return Response(
+            {'error': 'section parameter is required'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Get current section content
+    sections = cv.sections or {}
+    current_content = sections.get(section_name, '')
+
+    if not current_content:
+        return Response(
+            {'error': f'Section {section_name} is empty or does not exist'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Enhance with AI
+    enhanced_content = enhance_cv_section(section_name, current_content, context)
+
+    return Response({
+        'section': section_name,
+        'original': current_content,
+        'enhanced': enhanced_content
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def erase_data(request):
+    """Request data erasure (GDPR compliance)."""
+    # Create deletion request
+    deletion_request, created = DeletionRequest.objects.get_or_create(
+        user=request.user,
+        defaults={'status': 'pending'}
+    )
+
+    if not created and deletion_request.status == 'completed':
+        return Response(
+            {'message': 'Data already erased'},
+            status=status.HTTP_200_OK
+        )
+
+    # Create audit event
+    AuditEvent.objects.create(
+        user=request.user,
+        type='erasure_request',
+        payload={'status': 'pending'}
+    )
+
+    return Response({
+        'message': 'Data erasure request submitted',
+        'request_id': str(deletion_request.id),
+        'status': deletion_request.status
+    })
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def health_check(request):
+    """Health check endpoint."""
+    return Response({
+        'status': 'healthy',
+        'timestamp': timezone.now().isoformat()
+    })
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def erase_data(request):
     """Request complete data deletion (GDPR)."""
     # Check if already has pending request

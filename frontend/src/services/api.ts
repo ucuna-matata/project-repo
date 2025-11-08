@@ -308,3 +308,14 @@ export async function getFile(id: number) {
   });
   return handleResponse(res);
 }
+
+export async function enhanceCVSection(cvId: string, section: string, context?: string) {
+  const res = await fetch(`${API_ORIGIN}/api/cvs/${cvId}/enhance/`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: jsonHeaders(),
+    body: JSON.stringify({ section, context: context || '' }),
+  });
+  return handleResponse(res);
+}
+
