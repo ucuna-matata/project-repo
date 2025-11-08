@@ -209,7 +209,7 @@ export default function Interview() {
           />
 
           {showHint && aiHint && (
-            <div className="mt-4 p-4 bg-[#226A74] border-l-4 border-[#226A74] rounded-md">
+            <div className="mt-4 p-4 bg-white border-l-4 border-[#226A74] rounded-md">
               <div className="flex items-start">
                 <Lightbulb className="h-5 w-5 text-[#226A74] mr-2 mt-0.5 flex-shrink-0" />
                 <div>
