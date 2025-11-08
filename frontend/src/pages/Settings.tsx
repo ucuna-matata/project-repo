@@ -34,10 +34,10 @@ export default function Settings() {
         email: email,
         summary: summary,
       });
-      alert('✓ Profile updated successfully!');
+      alert(t('settings.profileUpdated'));
     } catch (error) {
       console.error('Failed to update profile:', error);
-      alert('✗ Failed to update profile. Please try again.');
+      alert(t('settings.profileUpdateFailed'));
     }
   };
 
@@ -65,21 +65,21 @@ export default function Settings() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      alert('✓ Data exported successfully!');
+      alert(t('settings.dataExported'));
     },
     onError: () => {
-      alert('✗ Failed to export data. Please try again.');
+      alert(t('settings.exportFailed'));
     },
   });
 
   const eraseMutation = useMutation({
     mutationFn: api.eraseData,
     onSuccess: () => {
-      alert('Data erasure request submitted. You will be logged out.');
+      alert(t('settings.dataErased'));
       window.location.href = '/login';
     },
     onError: () => {
-      alert('Failed to erase data. Please try again.');
+      alert(t('settings.eraseFailed'));
     },
   });
 
@@ -88,23 +88,14 @@ export default function Settings() {
   };
 
   const handleErase = () => {
-    const confirmed = window.confirm(
-      '⚠️ Are you absolutely sure you want to erase all your data?\n\n' +
-      'This will permanently delete:\n' +
-      '• Your profile and CV data\n' +
-      '• All interview sessions\n' +
-      '• All training results\n' +
-      '• Your account\n\n' +
-      'This action CANNOT be undone!\n\n' +
-      'Type "DELETE" in the next prompt to confirm.'
-    );
+    const confirmed = window.confirm(t('settings.eraseConfirm'));
 
     if (confirmed) {
-      const confirmation = window.prompt('Type "DELETE" to confirm permanent deletion:');
+      const confirmation = window.prompt(t('settings.erasePrompt'));
       if (confirmation === 'DELETE') {
         eraseMutation.mutate();
       } else {
-        alert('Deletion cancelled. Text did not match.');
+        alert(t('settings.eraseCancelled'));
       }
     }
   };
@@ -120,9 +111,9 @@ export default function Settings() {
           </div>
           <div>
             <h1 className="text-4xl font-bold gradient-text mb-2">
-              {t('settings.title') || 'Settings'}
+              {t('settings.title')}
             </h1>
-            <p className="text-lg text-slate-600">Manage your account and preferences</p>
+            <p className="text-lg text-slate-600">{t('settings.subtitle')}</p>
           </div>
         </div>
       </div>
@@ -133,7 +124,7 @@ export default function Settings() {
           <div className="bg-gradient-to-br from-primary-600 to-accent-600 p-3 rounded-xl shadow-lg">
             <User className="h-6 w-6 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900">Profile Information</h2>
+          <h2 className="text-2xl font-bold text-slate-900">{t('settings.profile.title')}</h2>
         </div>
 
         {profileLoading ? (
@@ -144,7 +135,7 @@ export default function Settings() {
           <form onSubmit={handleProfileUpdate} className="space-y-6">
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium text-slate-700 mb-2">
-                Full Name
+                {t('settings.profile.fullName')}
               </label>
               <input
                 type="text"
@@ -152,13 +143,13 @@ export default function Settings() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-primary-400 focus:ring-2 focus:ring-primary-200 transition-all"
-                placeholder="Enter your full name"
+                placeholder={t('settings.profile.fullNamePlaceholder')}
               />
             </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
-                Email Address
+                {t('settings.profile.email')}
               </label>
               <input
                 type="email"
@@ -166,13 +157,13 @@ export default function Settings() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-primary-400 focus:ring-2 focus:ring-primary-200 transition-all"
-                placeholder="your.email@example.com"
+                placeholder={t('settings.profile.emailPlaceholder')}
               />
             </div>
 
             <div>
               <label htmlFor="summary" className="block text-sm font-medium text-slate-700 mb-2">
-                Professional Summary
+                {t('settings.profile.summary')}
               </label>
               <textarea
                 id="summary"
@@ -180,7 +171,7 @@ export default function Settings() {
                 onChange={(e) => setSummary(e.target.value)}
                 rows={4}
                 className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-primary-400 focus:ring-2 focus:ring-primary-200 transition-all resize-none"
-                placeholder="Brief description about yourself and your professional background..."
+                placeholder={t('settings.profile.summaryPlaceholder')}
               />
             </div>
 
@@ -190,7 +181,7 @@ export default function Settings() {
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-600 to-accent-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save className="h-5 w-5" />
-              {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
+              {updateProfileMutation.isPending ? t('settings.profile.saving') : t('settings.profile.saveChanges')}
             </button>
           </form>
         )}
@@ -203,9 +194,9 @@ export default function Settings() {
             <div className="bg-gradient-to-br from-blue-500 to-cyan-500 p-3 rounded-xl shadow-lg">
               <Globe className="h-6 w-6 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900">Language</h2>
+            <h2 className="text-2xl font-bold text-slate-900">{t('settings.language.title')}</h2>
           </div>
-          <p className="text-slate-600 mb-4">Choose your preferred language</p>
+          <p className="text-slate-600 mb-4">{t('settings.language.description')}</p>
           <div className="flex gap-3">
             <button
               onClick={() => handleLocaleChange('en')}
@@ -236,15 +227,15 @@ export default function Settings() {
             <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-3 rounded-xl shadow-lg">
               <Bell className="h-6 w-6 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900">Notifications</h2>
+            <h2 className="text-2xl font-bold text-slate-900">{t('settings.notifications.title')}</h2>
           </div>
           <div className="space-y-4">
             <label className="flex items-center justify-between p-4 bg-white/50 rounded-xl hover:bg-white/70 transition-colors cursor-pointer">
-              <span className="text-slate-700 font-medium">Email notifications</span>
+              <span className="text-slate-700 font-medium">{t('settings.notifications.email')}</span>
               <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-primary-600 focus:ring-2 focus:ring-primary-500" defaultChecked />
             </label>
             <label className="flex items-center justify-between p-4 bg-white/50 rounded-xl hover:bg-white/70 transition-colors cursor-pointer">
-              <span className="text-slate-700 font-medium">Interview reminders</span>
+              <span className="text-slate-700 font-medium">{t('settings.notifications.reminders')}</span>
               <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-primary-600 focus:ring-2 focus:ring-primary-500" defaultChecked />
             </label>
           </div>
@@ -256,17 +247,17 @@ export default function Settings() {
             <div className="bg-gradient-to-br from-green-500 to-emerald-500 p-3 rounded-xl shadow-lg">
               <Download className="h-6 w-6 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900">Export Data</h2>
+            <h2 className="text-2xl font-bold text-slate-900">{t('settings.export.title')}</h2>
           </div>
           <p className="text-slate-600 mb-6">
-            Download all your data including CV, interview results, and trainer scores in JSON format.
+            {t('settings.export.description')}
           </p>
           <button
             onClick={handleExport}
             disabled={exportMutation.isPending}
             className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {exportMutation.isPending ? 'Exporting...' : 'Export My Data'}
+            {exportMutation.isPending ? t('settings.export.exporting') : t('settings.export.button')}
           </button>
         </div>
 
@@ -276,15 +267,15 @@ export default function Settings() {
             <div className="bg-gradient-to-br from-indigo-500 to-purple-500 p-3 rounded-xl shadow-lg">
               <Shield className="h-6 w-6 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900">Privacy</h2>
+            <h2 className="text-2xl font-bold text-slate-900">{t('settings.privacy.title')}</h2>
           </div>
           <div className="space-y-4">
             <label className="flex items-center justify-between p-4 bg-white/50 rounded-xl hover:bg-white/70 transition-colors cursor-pointer">
-              <span className="text-slate-700 font-medium">Allow analytics cookies</span>
+              <span className="text-slate-700 font-medium">{t('settings.privacy.analytics')}</span>
               <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-primary-600 focus:ring-2 focus:ring-primary-500" />
             </label>
             <label className="flex items-center justify-between p-4 bg-white/50 rounded-xl hover:bg-white/70 transition-colors cursor-not-allowed">
-              <span className="text-slate-700 font-medium">Essential cookies (required)</span>
+              <span className="text-slate-700 font-medium">{t('settings.privacy.essential')}</span>
               <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-primary-600" defaultChecked disabled />
             </label>
           </div>
@@ -298,12 +289,12 @@ export default function Settings() {
             <Trash2 className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-red-600">Danger Zone</h2>
-            <p className="text-slate-600">Proceed with caution</p>
+            <h2 className="text-2xl font-bold text-red-600">{t('settings.danger.title')}</h2>
+            <p className="text-slate-600">{t('settings.danger.warning')}</p>
           </div>
         </div>
         <p className="text-slate-700 mb-6 text-lg">
-          Permanently delete your account and all associated data. This action cannot be undone.
+          {t('settings.danger.description')}
         </p>
         <button
           onClick={handleErase}
@@ -311,10 +302,9 @@ export default function Settings() {
           className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Trash2 className="h-5 w-5" />
-          {eraseMutation.isPending ? 'Erasing...' : 'Erase My Data'}
+          {eraseMutation.isPending ? t('settings.danger.erasing') : t('settings.danger.button')}
         </button>
       </div>
     </div>
   );
 }
-
