@@ -1,0 +1,90 @@
+services:
+  # PostgreSQL Database
+  - type: pserv
+    name: hirely-db
+    env: docker
+    plan: free
+    region: frankfurt
+
+  # Django Backend
+  - type: web
+    name: hirely-backend
+    runtime: python
+    plan: free
+    region: frankfurt
+    buildCommand: cd backend && chmod +x build.sh && ./build.sh
+    startCommand: cd backend && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --threads 2 --timeout 60
+    healthCheckPath: /api/health/
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: hirely-db
+          property: connectionString
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: WEB_ORIGIN
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: LLM_PROVIDER_URL
+        value: https://api.groq.com/openai/v1
+      - key: LLM_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        value: llama-3.1-70b-versatile
+      - key: STORAGE_BACKEND
+        value: local
+
+  # React Frontend
+  - type: web
+    name: hirely-frontend
+    runtime: static
+    plan: free
+    region: frankfurt
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: NODE_VERSION
+        value: 18.18.0
+      - key: VITE_API_ORIGIN
+        sync: false
+
+databases:
+  - name: hirely-db
+    databaseName: hirely
+    user: hirely
+    plan: free
+    region: frankfurt
+#!/usr/bin/env bash
+# exit on error
+set -o errexit
+
+# Install dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+
+# Collect static files
+python manage.py collectstatic --no-input
+
+# Run migrations
+python manage.py migrate --no-input
+
+# Create logs directory
+mkdir -p logs
+
+echo "Build completed successfully!"
+
