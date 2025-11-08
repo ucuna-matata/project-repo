@@ -2,19 +2,19 @@
 
 AI-powered career assistant helping students build their professional future.
 
-Hirely — це веб-платформа, яка допомагає студентам створювати якісні резюме, тренуватись перед співбесідами та розвивати кар’єрні навички.  
-Проєкт створено під час хакатону як MVP-рішення з фокусом на UX, мультимовність і AI-інтеграцію.
+Hirely is a web platform designed to help students create professional resumes, prepare for interviews, and develop essential career skills.  
+The project was built during a hackathon as an MVP focusing on user experience, multilingual support, and AI integration.
 
 ---
 
 ## Features
 
-- CV Master — створення та редагування резюме з кількома шаблонами  
-- Interview Prep — симулятор співбесід із порадами від AI  
-- Skills Trainer — короткі тести для перевірки знань  
-- Dashboard & Settings — управління акаунтом, мовою та даними  
-- Multilanguage support — англійська та українська  
-- Data export — збереження результатів у форматі JSON
+- CV Master — create and edit resumes using multiple templates  
+- Interview Prep — mock interview simulator with AI feedback  
+- Skills Trainer — short quizzes to test and improve knowledge  
+- Dashboard & Settings — manage account, language, and data  
+- Multilanguage support — English and Ukrainian  
+- Data export — save results in JSON format
 
 ---
 
@@ -31,9 +31,9 @@ Hirely — це веб-платформа, яка допомагає студе�
 - Lucide React Icons  
 
 **Backend (API Integration)**
-- REST API з підтримкою OAuth 2.0 (Google Sign-In)
+- REST API with OAuth 2.0 (Google Sign-In)
 - HTTP-only cookie session (auth callback)
-- JSON responses для CV, Interview, Trainer modules
+- JSON responses for CV, Interview, and Trainer modules
 
 ---
 
@@ -94,15 +94,15 @@ yarn install
 npm run dev
 ```
 
-Application runs at **[http://localhost:5173](http://localhost:5173)**
+The application will be available at **[http://localhost:5173](http://localhost:5173)**
 
 ---
 
 ## Multilanguage
 
 * Default language: English
-* Supported: `en`, `uk`
-* Language is stored in `localStorage` and can be changed from **Settings → Language**
+* Supported languages: `en`, `uk`
+* The selected language is saved in `localStorage` and can be changed in **Settings → Language**
 
 ---
 
@@ -111,35 +111,35 @@ Application runs at **[http://localhost:5173](http://localhost:5173)**
 | Route        | Description                            |
 | ------------ | -------------------------------------- |
 | `/login`     | Google OAuth sign-in                   |
-| `/dashboard` | Overview of user’s activity            |
+| `/dashboard` | Overview of user activity              |
 | `/cv-list`   | Manage and export CVs                  |
 | `/cv-master` | Build or edit CV                       |
 | `/interview` | AI-powered interview simulator         |
-| `/trainer`   | Knowledge quizzes                      |
+| `/trainer`   | Knowledge and skill quizzes            |
 | `/settings`  | Profile, language, export & data erase |
 
 ---
 
 ## Architecture
 
-React App → REST API → Database (Backend Service)
+**React App → REST API → Database (Backend Service)**
 
-Мультимовність реалізовано через `react-i18next`, стан — через `React Query`.
-Компонентний підхід, чиста структура, чітке розділення бізнес-логіки (`services`, `hooks`) від UI (`components`, `pages`).
+Multilanguage is implemented with `react-i18next`, and data management is handled via `React Query`.
+The project follows a clean component-based architecture, with business logic separated into `services` and `hooks`, and presentation handled by `components` and `pages`.
 
 ---
 
 ## Authors
 
 **Team:** ucuna-matata
-Created during Hackathon CV 2025.
+Developed during **Hackathon CV 2025**.
 Open for further development and collaboration.
 
 ---
 
 ## License
 
-UCU © 2025 UCUna matata
-цей варіант виглядає акуратно і зрозуміло на GitHub — без жодних емодзі, кольорових тегів чи надмірного форматування.  
-якщо хочеш, я можу адаптувати коротку англомовну версію (1 сторінка, concise summary для README.md у production).
+UCU © 2025 UCUna Matata
+
+Would you like me to make a short production-ready version too (a 10–12 line README summary like most public GitHub projects use)? It’s ideal if you plan to make the repo public.
 ```
