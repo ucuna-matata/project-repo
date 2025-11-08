@@ -164,6 +164,16 @@ export function useSubmitInterview() {
   });
 }
 
+export function useGetInterviewHint() {
+  return useMutation({
+    mutationFn: ({ sessionId, questionId, currentAnswer }: {
+      sessionId: string;
+      questionId: string;
+      currentAnswer?: string;
+    }) => interviewService.getHint(sessionId, questionId, currentAnswer),
+  });
+}
+
 // ============ Trainer Hooks ============
 
 export function useTrainerCategories() {
@@ -251,4 +261,3 @@ export function useRequestDataErasure() {
     },
   });
 }
-

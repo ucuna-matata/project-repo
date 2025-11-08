@@ -165,7 +165,7 @@ export async function generateCV(payload: Record<string, unknown>, signal?: Abor
   return handleResponse(res);
 }
 export async function createInterviewSession(payload: Record<string, unknown>) {
-  const res = await fetch(`${API_ORIGIN}/api/interview/sessions`, {
+  const res = await fetch(`${API_ORIGIN}/api/interview/sessions/`, {
     method: 'POST',
     credentials: 'include',
     headers: jsonHeaders(),
@@ -174,20 +174,20 @@ export async function createInterviewSession(payload: Record<string, unknown>) {
   return handleResponse(res);
 }
 export async function listInterviewSessions() {
-  const res = await fetch(`${API_ORIGIN}/api/interview/sessions/list`, {
+  const res = await fetch(`${API_ORIGIN}/api/interview/sessions/list/`, {
     credentials: 'include',
   });
   return handleResponse(res);
 }
 export async function getInterviewSession(sessionId: string) {
-  const res = await fetch(`${API_ORIGIN}/api/interview/sessions/${sessionId}`, {
+  const res = await fetch(`${API_ORIGIN}/api/interview/sessions/${sessionId}/`, {
     credentials: 'include',
   });
   return handleResponse(res);
 }
 export async function saveInterviewAnswer(sessionId: string, payload: Record<string, unknown>) {
-  const res = await fetch(`${API_ORIGIN}/api/interview/sessions/${sessionId}/answer`, {
-    method: 'POST',
+  const res = await fetch(`${API_ORIGIN}/api/interview/sessions/${sessionId}/answer/`, {
+    method: 'PUT',
     credentials: 'include',
     headers: jsonHeaders(),
     body: JSON.stringify(payload),
@@ -195,10 +195,19 @@ export async function saveInterviewAnswer(sessionId: string, payload: Record<str
   return handleResponse(res);
 }
 export async function submitInterview(sessionId: string) {
-  const res = await fetch(`${API_ORIGIN}/api/interview/sessions/${sessionId}/submit`, {
+  const res = await fetch(`${API_ORIGIN}/api/interview/sessions/${sessionId}/submit/`, {
     method: 'POST',
     credentials: 'include',
     headers: csrfHeaders(),
+  });
+  return handleResponse(res);
+}
+export async function getInterviewHint(sessionId: string, payload: Record<string, unknown>) {
+  const res = await fetch(`${API_ORIGIN}/api/interview/sessions/${sessionId}/hint/`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: jsonHeaders(),
+    body: JSON.stringify(payload),
   });
   return handleResponse(res);
 }
@@ -224,7 +233,7 @@ export async function startTrainerAttempt(payload: Record<string, unknown>) {
   return handleResponse(res);
 }
 export async function submitTrainerAttempt(payload: Record<string, unknown>) {
-  const res = await fetch(`${API_ORIGIN}/api/trainer/submit`, {
+  const res = await fetch(`${API_ORIGIN}/api/trainer/submit/`, {
     method: 'POST',
     credentials: 'include',
     headers: jsonHeaders(),
@@ -233,13 +242,13 @@ export async function submitTrainerAttempt(payload: Record<string, unknown>) {
   return handleResponse(res);
 }
 export async function listTrainerResults() {
-  const res = await fetch(`${API_ORIGIN}/api/trainer/results`, {
+  const res = await fetch(`${API_ORIGIN}/api/trainer/results/`, {
     credentials: 'include',
   });
   return handleResponse(res);
 }
 export async function getTrainerResult(resultId: string) {
-  const res = await fetch(`${API_ORIGIN}/api/trainer/results/${resultId}`, {
+  const res = await fetch(`${API_ORIGIN}/api/trainer/results/${resultId}/`, {
     credentials: 'include',
   });
   return handleResponse(res);

@@ -1,26 +1,32 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Clock, Send, Loader2 } from 'lucide-react';
+import { Clock, Send, Loader2, Lightbulb } from 'lucide-react';
 import {
   useCreateInterviewSession,
   useInterviewSession,
   useSaveInterviewAnswer,
-  useSubmitInterview
+  useSubmitInterview,
+  useGetInterviewHint
 } from '../hooks/useApi';
 import { interviewService } from '../services';
 
 export default function Interview() {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [selectedTopic, setSelectedTopic] = useState<string>('');
   const [sessionId, setSessionId] = useState<string>('');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [currentAnswer, setCurrentAnswer] = useState('');
   const [timeSpent, setTimeSpent] = useState(0);
+  const [aiHint, setAiHint] = useState<string>('');
+  const [showHint, setShowHint] = useState(false);
 
   const createSession = useCreateInterviewSession();
   const { data: session, isLoading: loadingSession } = useInterviewSession(sessionId);
   const saveAnswer = useSaveInterviewAnswer();
   const submitInterview = useSubmitInterview();
+  const getHint = useGetInterviewHint();
 
   const topics = interviewService.getAvailableTopics();
   const questions = session?.questions || [];
@@ -91,12 +97,9 @@ export default function Interview() {
     }
 
     try {
-      await submitInterview.mutateAsync(sessionId);
-      alert('Interview submitted successfully!');
-      setSessionId('');
-      setSelectedTopic('');
-      setCurrentQuestion(0);
-      setCurrentAnswer('');
+      const result = await submitInterview.mutateAsync(sessionId);
+      // Redirect to results page
+      navigate(`/interview/results/${result.id}`);
     } catch (error) {
       console.error('Failed to submit interview:', error);
       alert('Failed to submit interview. Please try again.');
@@ -204,6 +207,49 @@ export default function Interview() {
             className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             placeholder="Type your answer here..."
           />
+
+          {showHint && aiHint && (
+            <div className="mt-4 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-md">
+              <div className="flex items-start">
+                <Lightbulb className="h-5 w-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h4 className="text-sm font-semibold text-blue-900 mb-1">AI Hint</h4>
+                  <p className="text-sm text-blue-800">{aiHint}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowHint(false)}
+                className="mt-2 text-xs text-blue-600 hover:text-blue-800"
+              >
+                Hide hint
+              </button>
+            </div>
+          )}
+
+          <div className="mt-4">
+            <button
+              onClick={async () => {
+                if (!currentQuestionData) return;
+                try {
+                  const result = await getHint.mutateAsync({
+                    sessionId,
+                    questionId: currentQuestionData.id,
+                    currentAnswer,
+                  });
+                  setAiHint(result.hint);
+                  setShowHint(true);
+                } catch (error) {
+                  console.error('Failed to get hint:', error);
+                  alert('Failed to get hint. Please try again.');
+                }
+              }}
+              disabled={getHint.isPending || !currentQuestionData}
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Lightbulb className="h-4 w-4 mr-2" />
+              {getHint.isPending ? 'Getting hint...' : 'Get AI Hint'}
+            </button>
+          </div>
 
           <div className="mt-6 flex justify-between">
             <button

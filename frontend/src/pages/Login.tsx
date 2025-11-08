@@ -1,10 +1,12 @@
 // frontend/src/pages/Login.tsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { authService } from '../services/auth';
 import { Chrome, Mail, Lock } from 'lucide-react';
 
 export default function Login() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [pwd, setPwd] = useState('');
@@ -36,7 +38,7 @@ export default function Login() {
   // Заглушка для email/password, бо бекенд не має відповідних ендпойнтів
   const handleContinue = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMsg('Email/password login is disabled. Please use “Continue with Google”.');
+    setMsg('Email/password login is disabled. Please use "Continue with Google".');
   };
 
   return (
@@ -61,10 +63,10 @@ export default function Login() {
         {/* Main Card */}
         <div className="glass-effect rounded-3xl p-8 shadow-2xl border border-white/10">
           <h1 className="text-3xl font-bold text-black text-center mb-2">
-            Welcome Back
+            {t('auth.welcomeBack')}
           </h1>
           <p className="text-slate-600 text-center mb-8">
-            Sign in to continue your career journey
+            {t('auth.signInSubtitle')}
           </p>
 
           {/* Google Sign In */}
@@ -74,13 +76,13 @@ export default function Login() {
             className="w-full inline-flex items-center justify-center gap-3 rounded-xl px-6 py-4 bg-white text-slate-800 font-semibold hover:bg-slate-50 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
           >
             <Chrome className="h-5 w-5" />
-            {loading ? 'Redirecting…' : 'Continue with Google'}
+            {loading ? t('auth.redirecting') : t('auth.continueWithGoogle')}
           </button>
 
           {/* Divider */}
           <div className="flex items-center gap-4 my-8">
             <div className="flex-1 h-px bg-white/20"></div>
-            <span className="text-slate-400 text-sm font-medium">or</span>
+            <span className="text-slate-400 text-sm font-medium">{t('auth.or')}</span>
             <div className="flex-1 h-px bg-white/20"></div>
           </div>
 
@@ -90,7 +92,7 @@ export default function Login() {
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
               <input
                 type="email"
-                placeholder="Enter email or username"
+                placeholder={t('auth.emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full rounded-xl bg-white/10 text-white placeholder-slate-400 pl-12 pr-4 py-4 outline-none border border-white/20 focus:border-primary-400 focus:bg-white/15 transition-all duration-200"
@@ -100,7 +102,7 @@ export default function Login() {
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
               <input
                 type="password"
-                placeholder="Enter password"
+                placeholder={t('auth.passwordPlaceholder')}
                 value={pwd}
                 onChange={(e) => setPwd(e.target.value)}
                 className="w-full rounded-xl bg-white/10 text-white placeholder-slate-400 pl-12 pr-4 py-4 outline-none border border-white/20 focus:border-primary-400 focus:bg-white/15 transition-all duration-200"
@@ -111,7 +113,7 @@ export default function Login() {
               type="submit"
               className="w-full rounded-xl px-6 py-4 bg-[#226A74] text-white font-semibold hover:from-primary-700 hover:to-accent-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
-              Continue
+              {t('auth.continue')}
             </button>
           </form>
 
@@ -124,23 +126,23 @@ export default function Login() {
 
           {/* Footer Links */}
           <p className="mt-8 text-center text-sm text-slate-400">
-            Don't have an account?{' '}
+            {t('auth.noAccount')}{' '}
             <a href="/login" className="text-primary-400 hover:text-primary-300 font-semibold underline underline-offset-2 transition-colors">
-              Sign up
+              {t('auth.signUp')}
             </a>
             {' '}•{' '}
             <a href="#" className="text-slate-500 hover:text-slate-400 cursor-not-allowed transition-colors">
-              Forgot password?
+              {t('auth.forgotPassword')}
             </a>
           </p>
         </div>
 
         {/* Bottom Text */}
         <p className="mt-8 text-center text-sm text-slate-400">
-          By continuing, you agree to our{' '}
-          <a href="#" className="text-primary-400 hover:text-primary-300 transition-colors">Terms</a>
-          {' '}and{' '}
-          <a href="#" className="text-primary-400 hover:text-primary-300 transition-colors">Privacy Policy</a>
+          {t('auth.byContinuing')}{' '}
+          <a href="#" className="text-primary-400 hover:text-primary-300 transition-colors">{t('auth.terms')}</a>
+          {' '}{t('auth.and')}{' '}
+          <a href="#" className="text-primary-400 hover:text-primary-300 transition-colors">{t('auth.privacyPolicy')}</a>
         </p>
       </div>
     </div>

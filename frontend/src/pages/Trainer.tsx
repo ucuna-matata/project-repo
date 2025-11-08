@@ -85,8 +85,19 @@ export default function Trainer() {
       })),
     };
 
+    console.log('📤 Submitting trainer result:', {
+      module_key: selectedCategory,
+      score,
+      max_score: questions.length,
+      metadata: {
+        questions,
+        answers: resultData.answers,
+        time_taken: timeTaken,
+      },
+    });
+
     try {
-      await submitAttempt.mutateAsync({
+      const response = await submitAttempt.mutateAsync({
         module_key: selectedCategory,
         score,
         max_score: questions.length,
@@ -97,12 +108,15 @@ export default function Trainer() {
         },
       });
 
+      console.log('✅ Successfully submitted trainer result:', response);
+
       // Показуємо результати
       setQuizResult(resultData);
       setStarted(false);
-    } catch (error) {
-      console.error('Failed to submit results:', error);
-      alert('Failed to submit results. Please try again.');
+    } catch (error: any) {
+      console.error('❌ Failed to submit results:', error);
+      const errorMessage = error?.body?.message || error?.message || 'Failed to submit results. Please try again.';
+      alert(`Error: ${errorMessage}`);
     }
   };
 

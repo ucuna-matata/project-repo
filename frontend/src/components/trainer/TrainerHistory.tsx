@@ -11,12 +11,27 @@ const formatDate = (dateString: string) => {
 };
 
 export default function TrainerHistory() {
-  const { data: results, isLoading } = useTrainerResults();
+  const { data: results, isLoading, error } = useTrainerResults();
+
+  console.log('📊 TrainerHistory - Loading:', isLoading);
+  console.log('📊 TrainerHistory - Results:', results);
+  console.log('📊 TrainerHistory - Error:', error);
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <Award className="h-16 w-16 text-red-400 mx-auto mb-4" />
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Results</h3>
+        <p className="text-red-600">{(error as any)?.message || 'Failed to load your quiz history.'}</p>
+        <p className="text-gray-600 mt-2">Please try refreshing the page.</p>
       </div>
     );
   }

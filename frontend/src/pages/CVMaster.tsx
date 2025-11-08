@@ -38,11 +38,11 @@ export default function CVMaster() {
       setError(null);
     } catch (err) {
       console.error('Failed to load CV:', err);
-      setError('Failed to load CV. Please try again.');
+      setError(t('cv.loadFailed'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (cvId && cvId !== currentCVId) {
@@ -79,13 +79,13 @@ export default function CVMaster() {
         navigate(`/cv-master?id=${savedCV.id}`, { replace: true });
       }
 
-      alert('CV saved successfully!');
+      alert(t('cv.cvSaved'));
     } catch (error) {
       console.error('Failed to save CV:', error);
-      alert('Failed to save CV. Please try again.');
+      alert(t('cv.saveFailed'));
       throw error;
     }
-  }, [currentCVId, navigate]);
+  }, [currentCVId, navigate, t]);
 
   const handleGenerate = useCallback(async (data: Partial<CVFormData>) => {
     try {
@@ -96,13 +96,13 @@ export default function CVMaster() {
       setCurrentCVId(generatedCV.id);
       navigate(`/cv-master?id=${generatedCV.id}`, { replace: true });
 
-      alert('CV generated successfully!');
+      alert(t('cv.cvGenerated'));
     } catch (error) {
       console.error('Failed to generate CV:', error);
-      alert('Failed to generate CV. Please try again.');
+      alert(t('cv.generateFailed'));
       throw error;
     }
-  }, [navigate]);
+  }, [navigate, t]);
 
   if (loading) {
     return (
@@ -119,7 +119,7 @@ export default function CVMaster() {
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">{t('cv.title')}</h1>
         <p className="mt-2 text-gray-600">
-          {currentCVId ? 'Edit your professional CV' : 'Create your professional CV with multiple templates'}
+          {currentCVId ? t('cv.edit') : t('cv.createNew')}
         </p>
       </div>
 
@@ -138,4 +138,3 @@ export default function CVMaster() {
     </div>
   );
 }
-
