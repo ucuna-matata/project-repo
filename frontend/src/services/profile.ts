@@ -1,5 +1,6 @@
 // Profile and CV service for frontend
 import * as api from './api';
+import type { CVFormData } from '../schemas/cvSchema';
 
 export interface Profile {
   id: string;
@@ -12,7 +13,7 @@ export interface Profile {
   skills: Skill[];
   projects: Project[];
   summary: string;
-  preferences: Record<string, any>;
+  preferences: Record<string, unknown>;
   updated_at: string;
 }
 
@@ -47,11 +48,11 @@ export interface Project {
 export interface CV {
   id: string;
   title: string;
-  template_key: string;
-  sections: Record<string, any>;
+  template_key: 'clean' | 'two-column' | 'modern' | 'professional';
+  sections: Omit<CVFormData, 'title' | 'template_key'>;
   rendered_pdf_url?: string;
   version: number;
-  changelog: any[];
+  changelog: Array<Record<string, unknown>>;
   created_at: string;
   updated_at: string;
 }
@@ -73,8 +74,8 @@ export const profileService = {
     return api.getCV(id);
   },
 
-  async createCV(data: { title: string; template_key?: string; sections?: Record<string, any> }): Promise<CV> {
-    return api.createCV(data);
+  async createCV(data: { title: string; template_key?: string; sections?: Partial<Omit<CVFormData, 'title' | 'template_key'>> }): Promise<CV> {
+    return api.createCV(data as Record<string, unknown>);
   },
 
   async updateCV(id: string, data: Partial<CV>): Promise<CV> {
@@ -89,15 +90,15 @@ export const profileService = {
     return api.exportCV(id, format);
   },
 
-  async generateCV(data: any, signal?: AbortSignal): Promise<CV> {
+  async generateCV(data: Record<string, unknown>, signal?: AbortSignal): Promise<CV> {
     return api.generateCV(data, signal);
   },
 
-  async exportAllData(): Promise<any> {
+  async exportAllData(): Promise<Blob> {
     return api.exportProfile();
   },
 
-  async requestDataErasure(): Promise<any> {
+  async requestDataErasure(): Promise<void> {
     return api.eraseData();
   },
 };

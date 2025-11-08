@@ -76,7 +76,7 @@ export function useCreateCV() {
 export function useUpdateCV() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) =>
+    mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) =>
       profileService.updateCV(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['cv', variables.id] });
@@ -143,7 +143,7 @@ export function useCreateInterviewSession() {
 export function useSaveInterviewAnswer() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ sessionId, data }: { sessionId: string; data: any }) =>
+    mutationFn: ({ sessionId, data }: { sessionId: string; data: { question_id: string; text: string; time_spent: number } }) =>
       interviewService.saveAnswer(sessionId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({

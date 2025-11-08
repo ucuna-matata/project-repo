@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Eye, Edit, Trash2, Calendar } from 'lucide-react';
-import { profileService, type CV } from '../services/profile';
+import { profileService, type CV } from '../services';
 import CVExportButtons from '../components/cv/CVExportButtons';
 
 export default function CVList() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [cvs, setCvs] = useState<CV[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +28,14 @@ export default function CVList() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCreate = () => {
+    navigate('/cv-master');
+  };
+
+  const handleEdit = (id: string) => {
+    navigate(`/cv-master?id=${id}`);
   };
 
   const handleDelete = async (id: string) => {
@@ -68,6 +78,7 @@ export default function CVList() {
           <p className="mt-2 text-gray-600">Create, manage, and export your professional CVs</p>
         </div>
         <button
+          onClick={handleCreate}
           className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
         >
           <Plus className="h-5 w-5 mr-2" />
@@ -91,6 +102,7 @@ export default function CVList() {
           <h3 className="text-lg font-medium text-gray-900 mb-2">No CVs yet</h3>
           <p className="text-gray-600 mb-6">Get started by creating your first professional CV</p>
           <button
+            onClick={handleCreate}
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
           >
             <Plus className="h-5 w-5 mr-2" />
@@ -127,6 +139,7 @@ export default function CVList() {
                       <Eye className="h-5 w-5" />
                     </button>
                     <button
+                      onClick={() => handleEdit(cv.id)}
                       className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded"
                       title="Edit CV"
                     >

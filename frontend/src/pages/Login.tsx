@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/auth';
-import { Sparkles, Chrome, Mail, Lock } from 'lucide-react';
+import { Chrome, Mail, Lock } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();

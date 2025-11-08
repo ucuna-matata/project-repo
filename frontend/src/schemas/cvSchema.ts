@@ -35,15 +35,29 @@ export const projectSchema = z.object({
   technologies: z.array(z.string()).optional(),
 });
 
+export const languageSchema = z.object({
+  name: z.string().min(1, 'Language name is required'),
+  level: z.string().optional(),
+});
+
+export const certificationSchema = z.object({
+  name: z.string().min(1, 'Certification name is required'),
+  issuer: z.string().optional(),
+  date: z.string().optional(),
+  url: z.string().url().optional().or(z.literal('')),
+});
+
 export const cvFormSchema = z.object({
   title: z.string().min(1, 'CV title is required'),
-  template_key: z.enum(['clean', 'two-column']),
+  template_key: z.enum(['clean', 'two-column', 'modern', 'professional']),
   personal: personalInfoSchema,
   summary: z.string().optional(),
   experience: z.array(experienceSchema),
   education: z.array(educationSchema),
   skills: z.array(z.string()),
   projects: z.array(projectSchema).optional(),
+  languages: z.array(languageSchema).optional(),
+  certifications: z.array(certificationSchema).optional(),
 });
 
 export type CVFormData = z.infer<typeof cvFormSchema>;

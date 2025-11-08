@@ -26,11 +26,11 @@ async function handleResponse(res: Response) {
     return res.blob();
   }
   // parse error body if available
-  let errBody: any;
+  let errBody: unknown;
   try {
     if (isJson) errBody = await res.json();
     else errBody = await res.text();
-  } catch (e) {
+  } catch {
     errBody = { message: 'Unknown error' };
   }
 
@@ -41,9 +41,9 @@ async function handleResponse(res: Response) {
     body: errBody
   });
 
-  const error = new Error(errBody?.message || res.statusText || 'Request failed');
-  (error as any).status = res.status;
-  (error as any).body = errBody;
+  const error = new Error((errBody as { message?: string })?.message || res.statusText || 'Request failed');
+  (error as Error & { status: number; body: unknown }).status = res.status;
+  (error as Error & { status: number; body: unknown }).body = errBody;
   throw error;
 }
 function jsonHeaders() {
@@ -70,7 +70,7 @@ export async function getProfile() {
   const res = await fetch(`${API_ORIGIN}/api/profile/`, { credentials: 'include' });
   return handleResponse(res);
 }
-export async function updateProfile(payload: any) {
+export async function updateProfile(payload: Record<string, unknown>) {
   const res = await fetch(`${API_ORIGIN}/api/profile/`, {
     method: 'PUT',
     credentials: 'include',
@@ -95,7 +95,7 @@ export async function deleteCV(id: string) {
   });
   return handleResponse(res);
 }
-export async function createCV(payload: any) {
+export async function createCV(payload: Record<string, unknown>) {
   const res = await fetch(`${API_ORIGIN}/api/cvs/`, {
     method: 'POST',
     credentials: 'include',
@@ -104,7 +104,7 @@ export async function createCV(payload: any) {
   });
   return handleResponse(res);
 }
-export async function updateCV(id: string, payload: any) {
+export async function updateCV(id: string, payload: Record<string, unknown>) {
   const res = await fetch(`${API_ORIGIN}/api/cvs/${id}/`, {
     method: 'PUT',
     credentials: 'include',
@@ -120,7 +120,7 @@ export async function exportCV(id: string, format: 'pdf' | 'docx') {
 
   if (!res.ok) {
     const error = new Error('Export failed');
-    (error as any).status = res.status;
+    (error as Error & { status: number }).status = res.status;
     throw error;
   }
 
@@ -138,7 +138,7 @@ export async function exportCV(id: string, format: 'pdf' | 'docx') {
 
   return { blob, filename };
 }
-export async function generateCV(payload: any, signal?: AbortSignal) {
+export async function generateCV(payload: Record<string, unknown>, signal?: AbortSignal) {
   const res = await fetch(`${API_ORIGIN}/api/cvs/generate/`, {
     method: 'POST',
     credentials: 'include',
@@ -148,7 +148,7 @@ export async function generateCV(payload: any, signal?: AbortSignal) {
   });
   return handleResponse(res);
 }
-export async function createInterviewSession(payload: any) {
+export async function createInterviewSession(payload: Record<string, unknown>) {
   const res = await fetch(`${API_ORIGIN}/api/interview/sessions`, {
     method: 'POST',
     credentials: 'include',
@@ -169,7 +169,7 @@ export async function getInterviewSession(sessionId: string) {
   });
   return handleResponse(res);
 }
-export async function saveInterviewAnswer(sessionId: string, payload: any) {
+export async function saveInterviewAnswer(sessionId: string, payload: Record<string, unknown>) {
   const res = await fetch(`${API_ORIGIN}/api/interview/sessions/${sessionId}/answer`, {
     method: 'POST',
     credentials: 'include',
@@ -198,7 +198,7 @@ export async function getTrainerQuestions(category: string, n: number = 10) {
   });
   return handleResponse(res);
 }
-export async function startTrainerAttempt(payload: any) {
+export async function startTrainerAttempt(payload: Record<string, unknown>) {
   const res = await fetch(`${API_ORIGIN}/api/trainer/start`, {
     method: 'POST',
     credentials: 'include',
@@ -207,7 +207,7 @@ export async function startTrainerAttempt(payload: any) {
   });
   return handleResponse(res);
 }
-export async function submitTrainerAttempt(payload: any) {
+export async function submitTrainerAttempt(payload: Record<string, unknown>) {
   const res = await fetch(`${API_ORIGIN}/api/trainer/submit`, {
     method: 'POST',
     credentials: 'include',

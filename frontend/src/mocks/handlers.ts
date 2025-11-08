@@ -1,5 +1,6 @@
 // @ts-expect-error - MSW v2 types may not be fully resolved
 import { http, HttpResponse } from 'msw';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 const API = import.meta.env.VITE_API_ORIGIN || 'http://localhost:8000';
 

@@ -41,7 +41,7 @@ export interface CV {
   id: UUID;
   user_id: UUID;
   title: string;
-  template_key: 'clean' | 'two-column';
+  template_key: 'clean' | 'two-column' | 'modern' | 'professional';
   sections: CVSections;
   rendered_pdf_url?: string;
   version?: number;
@@ -56,7 +56,7 @@ export interface CVSections {
   education?: EducationEntry[];
   skills?: string[];
   projects?: ProjectEntry[];
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface PersonalInfo {
@@ -118,7 +118,7 @@ export interface TrainerResult {
   score: number;
   correct_count?: number;
   total_count?: number;
-  details?: any[];
+  details?: Array<Record<string, unknown>>;
 }
 
 export interface ExportResponse {

@@ -40,6 +40,8 @@ class CV(models.Model):
     TEMPLATE_CHOICES = [
         ('clean', 'Clean Template'),
         ('two-column', 'Two Column Template'),
+        ('modern', 'Modern Template'),
+        ('professional', 'Professional Template'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

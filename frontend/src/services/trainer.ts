@@ -26,8 +26,8 @@ export interface TrainerAttempt {
   max_score: number;
   attempts: number;
   metadata: {
-    questions: any[];
-    answers: any[];
+    questions: Array<Record<string, unknown>>;
+    answers: Array<Record<string, unknown>>;
     time_taken?: number;
   };
   created_at: string;
@@ -51,7 +51,7 @@ export const trainerService = {
   /**
    * Start a new training attempt
    */
-  async startAttempt(data: { module_key: string; questions: any[] }): Promise<TrainerAttempt> {
+  async startAttempt(data: { module_key: string; questions: Array<Record<string, unknown>> }): Promise<TrainerAttempt> {
     return api.startTrainerAttempt(data);
   },
 
@@ -62,7 +62,7 @@ export const trainerService = {
     module_key: string;
     score: number;
     max_score: number;
-    metadata: any;
+    metadata: Record<string, unknown>;
   }): Promise<TrainerAttempt> {
     return api.submitTrainerAttempt(data);
   },

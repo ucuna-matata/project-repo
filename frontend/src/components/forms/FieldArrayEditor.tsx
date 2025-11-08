@@ -1,6 +1,7 @@
-import { useFieldArray, type Control } from 'react-hook-form';
 import { Plus, Trash2 } from 'lucide-react';
-import { Button } from '../ui/Button';
+import { useFieldArray } from 'react-hook-form';
+import type { Control } from 'react-hook-form';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 interface Field {
   name: string;
@@ -28,15 +29,14 @@ export function FieldArrayEditor({ control, name, fields, title, defaultValue }:
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-        <Button
+        <button
           type="button"
-          variant="secondary"
-          size="sm"
           onClick={() => append(defaultValue)}
+          className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
           <Plus className="h-4 w-4 mr-1" />
           Add
-        </Button>
+        </button>
       </div>
 
       {items.map((item, index) => (

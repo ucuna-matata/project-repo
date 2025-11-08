@@ -16,7 +16,7 @@ export default function Settings() {
 
   const exportMutation = useMutation({
     mutationFn: api.exportProfile,
-    onSuccess: (data: any) => {
+    onSuccess: (data: unknown) => {
       // Create a Blob from the JSON data
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = window.URL.createObjectURL(blob);

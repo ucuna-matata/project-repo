@@ -1,9 +1,15 @@
 // CV Template A: Clean Single-Column
-import type { CV } from '../../types/api';
+import type { CV } from '../../services';
+import type { CVFormData } from '../../schemas/cvSchema';
 
 interface CVTemplateCleanProps {
   cv: CV;
 }
+
+// Type definitions for sections
+type Experience = CVFormData['experience'][number];
+type Education = CVFormData['education'][number];
+type Project = NonNullable<CVFormData['projects']>[number];
 
 export default function CVTemplateClean({ cv }: CVTemplateCleanProps) {
   const { sections } = cv;
@@ -76,7 +82,7 @@ export default function CVTemplateClean({ cv }: CVTemplateCleanProps) {
           <h2 className="text-xl font-semibold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-1">
             Experience
           </h2>
-          {experience.map((exp: any, idx: number) => (
+          {experience.map((exp: Experience, idx: number) => (
             <div key={idx} className="mb-4 last:mb-0">
               <div className="flex justify-between items-baseline mb-1">
                 <h3 className="text-lg font-semibold text-gray-900">{exp.position}</h3>
@@ -109,7 +115,7 @@ export default function CVTemplateClean({ cv }: CVTemplateCleanProps) {
           <h2 className="text-xl font-semibold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-1">
             Education
           </h2>
-          {education.map((edu: any, idx: number) => (
+          {education.map((edu: Education, idx: number) => (
             <div key={idx} className="mb-3 last:mb-0">
               <div className="flex justify-between items-baseline mb-1">
                 <h3 className="text-lg font-semibold text-gray-900">{edu.degree}</h3>
@@ -151,7 +157,7 @@ export default function CVTemplateClean({ cv }: CVTemplateCleanProps) {
           <h2 className="text-xl font-semibold text-gray-900 mb-3 uppercase tracking-wide border-b border-gray-300 pb-1">
             Projects
           </h2>
-          {projects.map((project: any, idx: number) => (
+          {projects.map((project: Project, idx: number) => (
             <div key={idx} className="mb-3 last:mb-0">
               <h3 className="text-lg font-semibold text-gray-900 mb-1">
                 {project.name}

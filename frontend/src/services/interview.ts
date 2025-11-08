@@ -36,7 +36,7 @@ export const interviewService = {
    * Create a new interview session
    */
   async createSession(data: InterviewSessionCreate): Promise<InterviewSession> {
-    return api.createInterviewSession(data);
+    return api.createInterviewSession(data as unknown as Record<string, unknown>);
   },
 
   /**
@@ -60,7 +60,7 @@ export const interviewService = {
     sessionId: string,
     data: { question_id: string; text: string; time_spent: number }
   ): Promise<InterviewSession> {
-    return api.saveInterviewAnswer(sessionId, data);
+    return api.saveInterviewAnswer(sessionId, data as unknown as Record<string, unknown>);
   },
 
   /**

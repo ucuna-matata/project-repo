@@ -1,9 +1,17 @@
 // CV Template B: Two-Column Layout
-import type { CV } from '../../types/api';
+import type { CV } from '../../services';
+import type { CVFormData } from '../../schemas/cvSchema';
 
 interface CVTemplateTwoColumnProps {
   cv: CV;
 }
+
+// Type definitions for sections
+type Experience = CVFormData['experience'][number];
+type Education = CVFormData['education'][number];
+type Project = NonNullable<CVFormData['projects']>[number];
+type Language = NonNullable<CVFormData['languages']>[number];
+type Certification = NonNullable<CVFormData['certifications']>[number];
 
 export default function CVTemplateTwoColumn({ cv }: CVTemplateTwoColumnProps) {
   const { sections } = cv;
@@ -21,15 +29,15 @@ export default function CVTemplateTwoColumn({ cv }: CVTemplateTwoColumnProps) {
       {/* Left Sidebar - 30% */}
       <aside className="w-[30%] bg-gray-50 p-6 print:bg-gray-50">
         {/* Photo (optional) */}
-        {personal.photo && (
+        {(personal as Record<string, unknown>).photo ? (
           <div className="mb-6">
             <img
-              src={personal.photo}
+              src={String((personal as Record<string, unknown>).photo)}
               alt={personal.name}
               className="w-32 h-32 rounded-full mx-auto object-cover border-4 border-white shadow-md"
             />
           </div>
-        )}
+        ) : null}
 
         {/* Contact */}
         <section className="mb-6">
@@ -111,9 +119,9 @@ export default function CVTemplateTwoColumn({ cv }: CVTemplateTwoColumnProps) {
               Languages
             </h2>
             <ul className="space-y-1 text-xs text-gray-700">
-              {languages.map((lang: any, idx: number) => (
+              {languages.map((lang: Language, idx: number) => (
                 <li key={idx}>
-                  <span className="font-medium">{lang.name || lang}</span>
+                  <span className="font-medium">{lang.name}</span>
                   {lang.level && <span className="text-gray-600"> - {lang.level}</span>}
                 </li>
               ))}
@@ -128,9 +136,9 @@ export default function CVTemplateTwoColumn({ cv }: CVTemplateTwoColumnProps) {
               Certifications
             </h2>
             <ul className="space-y-2 text-xs text-gray-700">
-              {certifications.map((cert: any, idx: number) => (
+              {certifications.map((cert: Certification, idx: number) => (
                 <li key={idx}>
-                  <div className="font-medium">{cert.name || cert}</div>
+                  <div className="font-medium">{cert.name}</div>
                   {cert.issuer && <div className="text-gray-600">{cert.issuer}</div>}
                   {cert.date && <div className="text-gray-600">{cert.date}</div>}
                 </li>
@@ -147,9 +155,9 @@ export default function CVTemplateTwoColumn({ cv }: CVTemplateTwoColumnProps) {
           <h1 className="text-4xl font-bold text-gray-900 mb-1">
             {personal.name || 'Your Name'}
           </h1>
-          {personal.title && (
-            <h2 className="text-xl text-blue-600 font-medium mb-2">{personal.title}</h2>
-          )}
+          {(personal as Record<string, unknown>).title ? (
+            <h2 className="text-xl text-blue-600 font-medium mb-2">{String((personal as Record<string, unknown>).title)}</h2>
+          ) : null}
         </header>
 
         {/* Summary */}
@@ -168,7 +176,7 @@ export default function CVTemplateTwoColumn({ cv }: CVTemplateTwoColumnProps) {
             <h2 className="text-lg font-bold text-gray-900 uppercase tracking-wide mb-3 border-b-2 border-blue-500 pb-1">
               Experience
             </h2>
-            {experience.map((exp: any, idx: number) => (
+            {experience.map((exp: Experience, idx: number) => (
               <div key={idx} className="mb-4 last:mb-0 relative pl-4 border-l-2 border-blue-300">
                 <div className="absolute -left-[5px] top-1 w-2 h-2 bg-blue-500 rounded-full"></div>
                 <div className="flex justify-between items-baseline mb-1">
@@ -202,7 +210,7 @@ export default function CVTemplateTwoColumn({ cv }: CVTemplateTwoColumnProps) {
             <h2 className="text-lg font-bold text-gray-900 uppercase tracking-wide mb-3 border-b-2 border-blue-500 pb-1">
               Education
             </h2>
-            {education.map((edu: any, idx: number) => (
+            {education.map((edu: Education, idx: number) => (
               <div key={idx} className="mb-3 last:mb-0">
                 <div className="flex justify-between items-baseline mb-1">
                   <h3 className="text-base font-bold text-gray-900">{edu.degree}</h3>
@@ -228,7 +236,7 @@ export default function CVTemplateTwoColumn({ cv }: CVTemplateTwoColumnProps) {
             <h2 className="text-lg font-bold text-gray-900 uppercase tracking-wide mb-3 border-b-2 border-blue-500 pb-1">
               Projects
             </h2>
-            {projects.map((project: any, idx: number) => (
+            {projects.map((project: Project, idx: number) => (
               <div key={idx} className="mb-3 last:mb-0">
                 <h3 className="text-base font-bold text-gray-900 mb-1">
                   {project.name}
