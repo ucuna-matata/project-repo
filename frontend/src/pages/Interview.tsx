@@ -126,7 +126,7 @@ export default function Interview() {
   if (loadingSession) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#226A74]" />
       </div>
     );
   }
@@ -148,7 +148,7 @@ export default function Interview() {
               <button
                 key={topic}
                 onClick={() => handleTopicSelect(topic)}
-                className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
+                className="p-4 border-2 border-gray-200 rounded-lg hover:border-[#226A74] hover:bg-[#226A74]/10 transition-all text-left"
               >
                 <h3 className="font-semibold text-gray-900 capitalize">
                   {topic.replace('-', ' ')}
@@ -178,7 +178,7 @@ export default function Interview() {
             <button
               onClick={handleStartInterview}
               disabled={createSession.isPending}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50"
+              className="px-6 py-3 bg-[#226A74] text-white rounded-lg hover:bg-[#226A74] font-medium disabled:opacity-50"
             >
               {createSession.isPending ? 'Starting...' : t('interview.start')}
             </button>
@@ -204,22 +204,22 @@ export default function Interview() {
             value={currentAnswer}
             onChange={(e) => setCurrentAnswer(e.target.value)}
             rows={8}
-            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="w-full rounded-md border-gray-300 shadow-sm focus:border-[#226A74] focus:ring-[#226A74] sm:text-sm"
             placeholder="Type your answer here..."
           />
 
           {showHint && aiHint && (
-            <div className="mt-4 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-md">
+            <div className="mt-4 p-4 bg-[#226A74] border-l-4 border-[#226A74] rounded-md">
               <div className="flex items-start">
-                <Lightbulb className="h-5 w-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
+                <Lightbulb className="h-5 w-5 text-[#226A74] mr-2 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h4 className="text-sm font-semibold text-blue-900 mb-1">AI Hint</h4>
-                  <p className="text-sm text-blue-800">{aiHint}</p>
+                  <h4 className="text-sm font-semibold text-[#226A74] mb-1">AI Hint</h4>
+                  <p className="text-sm text-[#226A74]">{aiHint}</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowHint(false)}
-                className="mt-2 text-xs text-blue-600 hover:text-blue-800"
+                className="mt-2 text-xs text-[#226A74] hover:text-blue-800"
               >
                 Hide hint
               </button>
@@ -244,7 +244,7 @@ export default function Interview() {
                 }
               }}
               disabled={getHint.isPending || !currentQuestionData}
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#226A74] rounded-md hover:bg-[#1B575F] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Lightbulb className="h-4 w-4 mr-2" />
               {getHint.isPending ? 'Getting hint...' : 'Get AI Hint'}
@@ -263,7 +263,7 @@ export default function Interview() {
               <button
                 onClick={handleSaveAndNext}
                 disabled={!currentAnswer.trim() || saveAnswer.isPending}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#226A74] rounded-md hover:bg-[#1B575F] disabled:cursor-not-allowed"
               >
                 {saveAnswer.isPending ? 'Saving...' : 'Save & Next'}
               </button>
@@ -271,7 +271,7 @@ export default function Interview() {
               <button
                 onClick={handleSubmit}
                 disabled={submitInterview.isPending}
-                className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 disabled:opacity-50"
+                className="inline-flex items-center px-4 py-2 bg-[#226A74] text-white rounded-md text-sm font-medium hover:bg-[#226A74] disabled:opacity-50"
               >
                 <Send className="h-4 w-4 mr-2" />
                 {submitInterview.isPending ? 'Submitting...' : t('interview.submit')}

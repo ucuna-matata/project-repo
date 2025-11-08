@@ -106,7 +106,7 @@ export default function Settings() {
       <div className="relative overflow-hidden rounded-3xl glass-effect p-8">
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary-400/20 to-accent-400/20 rounded-full blur-3xl -z-10"></div>
         <div className="flex items-start gap-4">
-          <div className="bg-gradient-to-br from-primary-600 to-accent-600 p-3 rounded-2xl shadow-lg">
+          <div className="bg-gradient-to-br from-[#2C848F] to-[#226A74] p-3 rounded-2xl shadow-lg">
             <User className="h-8 w-8 text-white" />
           </div>
           <div>
@@ -121,7 +121,7 @@ export default function Settings() {
       {/* Profile Information */}
       <div className="glass-effect p-8 rounded-2xl">
         <div className="flex items-center gap-3 mb-6">
-          <div className="bg-gradient-to-br from-primary-600 to-accent-600 p-3 rounded-xl shadow-lg">
+          <div className="bg-gradient-to-br from-[#2C848F] to-[#226A74] p-3 rounded-xl shadow-lg">
             <User className="h-6 w-6 text-white" />
           </div>
           <h2 className="text-2xl font-bold text-slate-900">{t('settings.profile.title')}</h2>
@@ -178,7 +178,7 @@ export default function Settings() {
             <button
               type="submit"
               disabled={updateProfileMutation.isPending}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-600 to-accent-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#226A74] to-[#226A74] text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save className="h-5 w-5" />
               {updateProfileMutation.isPending ? t('settings.profile.saving') : t('settings.profile.saveChanges')}
@@ -202,7 +202,7 @@ export default function Settings() {
               onClick={() => handleLocaleChange('en')}
               className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
                 locale === 'en'
-                  ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg'
+                  ? 'bg-gradient-to-r from-[#226A74] to-[#226A74] text-white shadow-lg'
                   : 'bg-white text-slate-700 border-2 border-slate-200 hover:border-primary-300 hover:shadow-md'
               }`}
             >
@@ -212,7 +212,7 @@ export default function Settings() {
               onClick={() => handleLocaleChange('uk')}
               className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
                 locale === 'uk'
-                  ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg'
+                  ? 'bg-gradient-to-r from-[#226A74] to-[#226A74] text-white shadow-lg'
                   : 'bg-white text-slate-700 border-2 border-slate-200 hover:border-primary-300 hover:shadow-md'
               }`}
             >
@@ -255,10 +255,12 @@ export default function Settings() {
           <button
             onClick={handleExport}
             disabled={exportMutation.isPending}
-            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-6 py-3 bg-[#226A74] hover:bg-[#1B515A] text-white rounded-xl font-semibold shadow-md transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {exportMutation.isPending ? t('settings.export.exporting') : t('settings.export.button')}
           </button>
+
+
         </div>
 
         {/* Privacy */}

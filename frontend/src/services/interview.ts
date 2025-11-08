@@ -19,7 +19,7 @@ export interface AIFeedback {
   weaknesses: string[];
   tips: string[];
   overall_assessment: string;
-with  recommendation?: string;
+  recommendation?: string;
 }
 
 export interface DetailedReview {

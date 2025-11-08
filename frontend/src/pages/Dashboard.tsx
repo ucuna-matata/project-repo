@@ -63,11 +63,11 @@ export default function Dashboard() {
     <div className="space-y-12 animate-slide-up">
       {/* Hero Section */}
       <div className="relative overflow-hidden rounded-3xl glass-effect p-12">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-primary-400/20 to-accent-400/20 rounded-full blur-3xl -z-10"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-white to-white rounded-full blur-3xl -z-10"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-blue-400/20 to-cyan-400/20 rounded-full blur-3xl -z-10"></div>
         
         <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary-600 to-accent-600 text-white px-4 py-2 rounded-full text-sm font-semibold mb-6 shadow-lg">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#2C848F] to-[#1B575F] text-white px-4 py-2 rounded-full text-sm font-semibold mb-6 shadow-lg">
             <Sparkles className="h-4 w-4" />
             <span>AI-Powered Career Tools</span>
           </div>
@@ -123,7 +123,7 @@ export default function Dashboard() {
           <h2 className="text-2xl font-bold text-slate-900">My CVs</h2>
           <Link
             to="/cv-list"
-            className="inline-flex items-center gap-2 text-primary-600 font-semibold hover:gap-3 transition-all"
+            className="inline-flex items-center gap-2 text-[#226A74] font-semibold hover:gap-3 transition-all"
           >
             View All
             <ArrowRight className="h-5 w-5" />
@@ -160,7 +160,7 @@ export default function Dashboard() {
                       {cv.title}
                     </h3>
                     <div className="flex items-center gap-3 text-sm text-slate-600">
-                      <span className="px-2 py-0.5 bg-primary-100 text-primary-700 rounded text-xs font-medium">
+                      <span className="px-2 py-0.5 bg-[#226A74]/60 text-white rounded text-xs font-medium">
                         {cv.template_key}
                       </span>
                       <span>Updated {formatDate(cv.updated_at)}</span>
