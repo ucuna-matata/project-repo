@@ -283,9 +283,3 @@ export async function getFile(id: number) {
   });
   return handleResponse(res);
 }
-export async function healthCheck() {
-  const res = await fetch(`${API_ORIGIN}/api/healthz/`, {
-    credentials: 'include',
-  });
-  return handleResponse(res);
-}

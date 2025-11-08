@@ -30,7 +30,7 @@
   -moz-osx-font-smoothing: grayscale;
 }
 body {
-  background: linear-gradient(to bottom right, rgb(248 250 252), rgb(239 246 255), rgb(238 242 255));
+  background-color: #d8d8d8;
   color: rgb(15 23 42);
   margin: 0;
   min-width: 320px;

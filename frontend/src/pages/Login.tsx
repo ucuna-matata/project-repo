@@ -40,31 +40,30 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-primary-900 to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-[#E8E8E8]">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#226A74]/50 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#226A74]/50 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-[#226A74]/50 rounded-full blur-3xl animate-pulse delay-500"></div>
       </div>
 
       <div className="relative z-10 w-full max-w-md px-6 animate-scale-in">
         {/* Logo/Brand */}
-        <div className="flex justify-center mb-12">
-          <div className="flex items-center gap-3 group">
-            <div className="bg-gradient-to-br from-primary-500 to-accent-500 p-3 rounded-2xl shadow-2xl group-hover:scale-110 transition-transform duration-300">
-              <Sparkles className="h-8 w-8 text-white" />
-            </div>
-            <span className="text-4xl font-bold text-white">Hirely</span>
-          </div>
+        <div className="flex justify-center mb-8">
+          <img
+            src="/logo.png"
+            alt="Hirely Logo"
+            className="w-50 h-50 object-contain"
+          />
         </div>
 
         {/* Main Card */}
         <div className="glass-effect rounded-3xl p-8 shadow-2xl border border-white/10">
-          <h1 className="text-3xl font-bold text-white text-center mb-2">
+          <h1 className="text-3xl font-bold text-black text-center mb-2">
             Welcome Back
           </h1>
-          <p className="text-slate-300 text-center mb-8">
+          <p className="text-slate-600 text-center mb-8">
             Sign in to continue your career journey
           </p>
 
@@ -110,7 +109,7 @@ export default function Login() {
 
             <button
               type="submit"
-              className="w-full rounded-xl px-6 py-4 bg-gradient-to-r from-primary-600 to-accent-600 text-white font-semibold hover:from-primary-700 hover:to-accent-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="w-full rounded-xl px-6 py-4 bg-[#226A74] text-white font-semibold hover:from-primary-700 hover:to-accent-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
               Continue
             </button>
