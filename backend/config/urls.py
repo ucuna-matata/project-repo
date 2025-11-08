@@ -19,6 +19,9 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from django.urls import path
+from interview.llama_api import ask_llama
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('authz.urls')),
@@ -26,6 +29,8 @@ urlpatterns = [
     path('api/trainer/', include('trainer.urls')),
     path('api/files/', include('files.urls')),
     path('api/', include('profiles.urls')),  # Most generic, should be last
+
+    path("ask-llama/", ask_llama)
 ]
 
 if settings.DEBUG:
