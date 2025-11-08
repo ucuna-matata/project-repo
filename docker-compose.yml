@@ -1,64 +1,64 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15-alpine
-    container_name: vectorb_db
+    container_name: hirely-db
     environment:
-      POSTGRES_DB: vectorb_db
-      POSTGRES_USER: vectorb_user
-      POSTGRES_PASSWORD: vectorb_pass
+      - POSTGRES_DB=hirely
+      - POSTGRES_USER=hirely
+      - POSTGRES_PASSWORD=hirely123
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - hirely-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U vectorb_user -d vectorb_db"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U hirely"]
+      interval: 5s
       timeout: 5s
       retries: 5
-
   backend:
     build:
-      context: ./backend
-      dockerfile: ../docker/backend.Dockerfile
-    container_name: vectorb_backend
-    environment:
-      - DEBUG=True
-      - SECRET_KEY=dev-secret-key-change-in-production
-      - DATABASE_URL=postgresql://vectorb_user:vectorb_pass@db:5432/vectorb_db
-      - ALLOWED_HOSTS=localhost,127.0.0.1,backend
-      - CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - WEB_ORIGIN=http://localhost:5173
-      - LLM_PROVIDER_URL=${LLM_PROVIDER_URL:-https://api.openai.com/v1}
-      - LLM_API_KEY=${LLM_API_KEY}
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    container_name: hirely-backend
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/app
-      - backend_media:/app/media
+      - backend-media:/app/media
+    env_file:
+      - ./backend/.env
+    environment:
+      - DEBUG=True
+      - ALLOWED_HOSTS=localhost,127.0.0.1,backend
+      - CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+      - WEB_ORIGIN=http://localhost:5173
+      - DATABASE_URL=sqlite:///db.sqlite3
     depends_on:
       db:
         condition: service_healthy
-    command: python manage.py runserver 0.0.0.0:8000
-
+    networks:
+      - hirely-network
   frontend:
     build:
-      context: ./frontend
-      dockerfile: ../docker/frontend.Dockerfile
-    container_name: vectorb_frontend
-    environment:
-      - VITE_API_URL=http://localhost:8000
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    container_name: hirely-frontend
     ports:
       - "5173:5173"
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    command: npm run dev -- --host 0.0.0.0
-
+    environment:
+      - VITE_API_ORIGIN=http://localhost:8000
+    depends_on:
+      - backend
+    networks:
+      - hirely-network
 volumes:
-  postgres_data:
-  backend_media:
-
+  postgres-data:
+  backend-media:
+networks:
+  hirely-network:
+    driver: bridge

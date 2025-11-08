@@ -163,3 +163,53 @@ class ExportTests(TestCase):
         self.assertEqual(response.data['user']['email'], 'export@example.com')
         self.assertEqual(len(response.data['cvs']), 1)
 
+
+class CVExportTests(TestCase):
+    """Test CV export to PDF and DOCX."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            email='cvexport@example.com',
+            google_sub='google999'
+        )
+        Profile.objects.create(user=self.user, summary='Test profile')
+        self.cv = CV.objects.create(
+            user=self.user,
+            title='Test Export CV',
+            template_key='clean',
+            sections={
+                'personal': {
+                    'name': 'Test User',
+                    'email': 'test@example.com',
+                    'phone': '+1 555-1234',
+                    'location': 'Test City'
+                },
+                'summary': 'Test summary',
+                'experience': [
+                    {
+                        'position': 'Developer',
+                        'company': 'Test Corp',
+                        'start_date': '2020-01',
+                        'end_date': None,
+                        'description': 'Test description',
+                        'achievements': ['Achievement 1', 'Achievement 2']
+                    }
+                ],
+                'education': [
+                    {
+                        'degree': 'BS Computer Science',
+                        'institution': 'Test University',
+                        'start_date': '2016-09',
+                        'end_date': '2020-05'
+                    }
+                ],
+                'skills': ['Python', 'Django', 'React'],
+                'projects': [],
+                'links': {
+                    'github': 'https://github.com/testuser',
+                    'linkedin': 'https://linkedin.com/in/testuser'
+                }
+            }
+        )
+        self.client.force_authenticate(user=self.user)

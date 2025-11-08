@@ -18,14 +18,25 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import JsonResponse
+
+from django.urls import path
+from interview.llama_api import ask_llama
+
+def health_check(request):
+    """Health check endpoint for monitoring"""
+    return JsonResponse({"status": "ok", "service": "hirely-backend"})
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/health/', health_check, name='health_check'),
     path('api/auth/', include('authz.urls')),
-    path('api/', include('profiles.urls')),
     path('api/interview/', include('interview.urls')),
     path('api/trainer/', include('trainer.urls')),
     path('api/files/', include('files.urls')),
+    path('api/', include('profiles.urls')),  # Most generic, should be last
+
+    path("ask-llama/", ask_llama)
 ]
 
 if settings.DEBUG:

@@ -19,8 +19,10 @@ class TrainerAttemptSerializer(serializers.Serializer):
 
 
 class TrainerSubmitSerializer(serializers.Serializer):
-    answers = serializers.ListField(
-        child=serializers.DictField()
+    module_key = serializers.ChoiceField(
+        choices=['frontend-basics', 'backend-basics', 'algorithms', 'system-design', 'behavioral']
     )
-    time_taken = serializers.IntegerField(min_value=0, required=False)
+    score = serializers.DecimalField(max_digits=5, decimal_places=2)
+    max_score = serializers.DecimalField(max_digits=5, decimal_places=2)
+    metadata = serializers.JSONField(required=False, default=dict)
 

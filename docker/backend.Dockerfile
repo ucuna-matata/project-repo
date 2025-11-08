@@ -1,21 +1,27 @@
-FROM python:3.11-slim
-
+FROM python:3.12-slim
+# Set working directory
 WORKDIR /app
-
-# Install system dependencies
+# Install system dependencies including WeasyPrint requirements
 RUN apt-get update && apt-get install -y \
-    postgresql-client \
-    libpq-dev \
     gcc \
+    postgresql-client \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libgdk-pixbuf-2.0-0 \
+    libffi-dev \
+    libcairo2 \
+    libglib2.0-0 \
+    shared-mime-info \
     && rm -rf /var/lib/apt/lists/*
-
+# Copy requirements first for better caching
+COPY backend/requirements.txt .
 # Install Python dependencies
-COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy application code
-COPY . .
-
-# Run migrations and collect static files on startup
+# Copy backend code
+COPY backend/ .
+# Create necessary directories
+RUN mkdir -p logs media/exports
+# Expose port
+EXPOSE 8000
+# Run migrations and start server
 CMD python manage.py migrate && python manage.py runserver 0.0.0.0:8000
-

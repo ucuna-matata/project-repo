@@ -58,7 +58,7 @@ class SecurityHeadersMiddleware:
 
     def __call__(self, request):
         response = self.get_response(request)
-        
+
         # Add security headers
         response['X-Content-Type-Options'] = 'nosniff'
         response['X-Frame-Options'] = 'DENY'
@@ -75,6 +75,7 @@ class SecurityHeadersMiddleware:
                 "font-src 'self' data:; "
                 "connect-src 'self';"
             )
-        
+            response['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains; preload'
+
         return response
 

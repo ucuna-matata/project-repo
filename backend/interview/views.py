@@ -145,12 +145,22 @@ def submit_interview(request, session_id):
         {'criterion': 'Completed within reasonable time', 'passed': session.duration_sec < 1800},  # 30 min
     ]
 
-    # Placeholder for AI feedback (would call LLM service here)
-    session.ai_feedback = {
-        'strengths': ['Completed all questions', 'Good detail in answers'],
-        'weaknesses': ['Could provide more specific examples'],
-        'tips': ['Practice explaining concepts with real-world examples']
-    }
+    # Generate AI feedback using Groq
+    try:
+        from .llama_api import generate_interview_feedback
+        overall_feedback, detailed_review = generate_interview_feedback(session)
+        session.ai_feedback = overall_feedback
+        session.detailed_review = detailed_review
+    except Exception as e:
+        print(f"Warning: Failed to generate AI feedback: {e}")
+        session.ai_feedback = {
+            'strengths': ['Completed the interview'],
+            'weaknesses': ['AI feedback not available'],
+            'tips': ['Practice explaining concepts with real-world examples'],
+            'overall_assessment': 'Unable to generate detailed feedback at this time.',
+            'recommendation': 'Please try again or contact support.'
+        }
+        session.detailed_review = []
 
     session.save()
 
@@ -162,4 +172,73 @@ def submit_interview(request, session_id):
     )
 
     return Response(InterviewSessionSerializer(session).data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def get_ai_hint(request, session_id):
+    """Get an AI hint for the current question."""
+    session = get_object_or_404(InterviewSession, id=session_id, user=request.user, status='in_progress')
+
+    question_id = request.data.get('question_id')
+    current_answer = request.data.get('current_answer', '')
+
+    if not question_id:
+        return Response({'error': 'question_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Find the question
+    question = next((q for q in session.questions if q['id'] == question_id), None)
+    if not question:
+        return Response({'error': 'Question not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Get AI hint
+    try:
+        from .llama_api import get_ai_hint as generate_hint
+        hint = generate_hint(question['text'], current_answer)
+        return Response({'hint': hint})
+    except Exception as e:
+        print(f"Error generating hint: {e}")
+        return Response({
+            'hint': 'Consider the key concepts related to this topic. Break down the question into smaller parts.'
+        })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def retake_interview(request, session_id):
+    """Create a new interview session based on a completed one (retake)."""
+    original_session = get_object_or_404(InterviewSession, id=session_id, user=request.user)
+
+    if original_session.status != 'completed':
+        return Response(
+            {'error': 'Can only retake completed interviews'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if not original_session.can_retake:
+        return Response(
+            {'error': 'This interview cannot be retaken'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    # Create new session with same questions (or similar ones)
+    # You can optionally shuffle or select different questions from the same topic
+    new_session = InterviewSession.objects.create(
+        user=request.user,
+        questions=original_session.questions,  # Use same questions for practice
+        status='in_progress'
+    )
+
+    # Create audit event
+    AuditEvent.objects.create(
+        user=request.user,
+        type='interview_retake',
+        payload={
+            'original_session_id': str(original_session.id),
+            'new_session_id': str(new_session.id)
+        }
+    )
+
+    response_serializer = InterviewSessionSerializer(new_session)
+    return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
