@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Eye, Edit, Trash2, Calendar } from 'lucide-react';
-import { profileService, type CV } from '../../services/profile';
-import CVExportButtons from '../../components/cv/CVExportButtons';
+import { profileService, type CV } from '../services/profile';
+import CVExportButtons from '../components/cv/CVExportButtons';
 
 export default function CVList() {
   const { t } = useTranslation();

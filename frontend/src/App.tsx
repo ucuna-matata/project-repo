@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './i18n/config';
 import Dashboard from './pages/Dashboard';
 import CVMaster from './pages/CVMaster';
+import CVList from './pages/CVList';
 import Interview from './pages/Interview';
 import Trainer from './pages/Trainer';
 import Settings from './pages/Settings';
@@ -54,6 +55,7 @@ export default function App() {
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="cv" element={<CVMaster />} />
+              <Route path="cv-list" element={<CVList />} />
               <Route path="interview" element={<Interview />} />
               <Route path="trainer" element={<Trainer />} />
               <Route path="settings" element={<Settings />} />
