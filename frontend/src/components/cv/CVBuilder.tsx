@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { cvFormSchema, type CVFormData } from '../../schemas/cvSchema';
 import CVPreview from './CVPreview';
 import CVExportButtons from './CVExportButtons';
+import { useProfile } from '../../hooks/useApi';
 
 interface CVBuilderProps {
   initialData?: Partial<CVFormData>;
@@ -36,9 +37,29 @@ export default function CVBuilder({ initialData, cvId, onSave, onGenerate }: CVB
   const [isSaving, setIsSaving] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
+  // Fetch user profile to auto-populate name and email
+  const { data: profile } = useProfile();
+
   const formDefaultValues = useMemo(() => {
-    return initialData ? { ...defaultFormValues, ...initialData } : defaultFormValues;
-  }, [initialData]);
+    // If initialData is provided, use it (editing existing CV)
+    if (initialData) {
+      return { ...defaultFormValues, ...initialData };
+    }
+
+    // Otherwise, pre-fill from profile (new CV)
+    if (profile) {
+      return {
+        ...defaultFormValues,
+        personal: {
+          ...defaultFormValues.personal,
+          name: profile.full_name || '',
+          email: profile.email || '',
+        },
+      };
+    }
+
+    return defaultFormValues;
+  }, [initialData, profile]);
 
   const {
     register,
@@ -52,12 +73,22 @@ export default function CVBuilder({ initialData, cvId, onSave, onGenerate }: CVB
     defaultValues: formDefaultValues,
   });
 
-  // Update form when initialData changes
+  // Update form when initialData or profile changes
   useEffect(() => {
     if (initialData) {
       reset({ ...defaultFormValues, ...initialData });
+    } else if (profile) {
+      // Pre-fill from profile for new CVs
+      reset({
+        ...defaultFormValues,
+        personal: {
+          ...defaultFormValues.personal,
+          name: profile.full_name || '',
+          email: profile.email || '',
+        },
+      });
     }
-  }, [initialData, reset]);
+  }, [initialData, profile, reset]);
 
   const {
     fields: experienceFields,

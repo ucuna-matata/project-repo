@@ -1,7 +1,10 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 import random
+from .models import TrainerResult
+from .serializers import TrainerResultSerializer, TrainerSubmitSerializer
 
 
 QUIZ_BANK = {
@@ -94,3 +97,58 @@ def get_questions(request, category):
 def get_categories(request):
     """API endpoint: /trainer/categories/ — список усіх категорій."""
     return Response({'categories': list(QUIZ_BANK.keys())})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def submit_result(request):
+    """API endpoint: /trainer/submit/ — збереження результатів тесту."""
+    serializer = TrainerSubmitSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    module_key = request.data.get('module_key')
+    score = request.data.get('score')
+    max_score = request.data.get('max_score')
+    metadata = request.data.get('metadata', {})
+
+    # Перевіряємо чи користувач вже проходив цей модуль
+    previous_attempts = TrainerResult.objects.filter(
+        user=request.user,
+        module_key=module_key
+    ).count()
+
+    # Створюємо новий результат
+    result = TrainerResult.objects.create(
+        user=request.user,
+        module_key=module_key,
+        score=score,
+        max_score=max_score,
+        attempts=previous_attempts + 1,
+        metadata=metadata
+    )
+
+    result_serializer = TrainerResultSerializer(result)
+    return Response(result_serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def list_results(request):
+    """API endpoint: /trainer/results/ — список всіх результатів користувача."""
+    results = TrainerResult.objects.filter(user=request.user)
+    serializer = TrainerResultSerializer(results, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_result(request, result_id):
+    """API endpoint: /trainer/results/<result_id>/ — отримання конкретного результату."""
+    try:
+        result = TrainerResult.objects.get(id=result_id, user=request.user)
+        serializer = TrainerResultSerializer(result)
+        return Response(serializer.data)
+    except TrainerResult.DoesNotExist:
+        return Response({'error': 'Result not found'}, status=status.HTTP_404_NOT_FOUND)
+

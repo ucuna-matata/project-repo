@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FileText, File } from 'lucide-react';
-import { profileService } from '../../services/profile';
+import { profileService } from '../../services';
 
 interface CVExportButtonsProps {
   cvId: string;
@@ -12,27 +12,55 @@ export default function CVExportButtons({ cvId }: CVExportButtonsProps) {
   const [exportFormat, setExportFormat] = useState<'pdf' | 'docx' | null>(null);
 
   const handleExport = async (format: 'pdf' | 'docx') => {
+    console.log(`[CVExport] Starting export: format=${format}, cvId=${cvId}`);
     setIsExporting(true);
     setExportFormat(format);
 
     try {
+      console.log(`[CVExport] Calling exportCV service...`);
       const { blob, filename } = await profileService.exportCV(cvId, format);
 
-      // Create download link
+      console.log(`[CVExport] Received blob:`, {
+        size: blob.size,
+        type: blob.type,
+        filename: filename
+      });
+
+      // Verify we got data
+      if (blob.size === 0) {
+        throw new Error('Received empty file');
+      }
+
+      // Create a download link
       const url = window.URL.createObjectURL(blob);
+      console.log(`[CVExport] Created blob URL: ${url}`);
+
       const link = document.createElement('a');
       link.href = url;
       link.download = filename;
+      link.style.display = 'none';
+
+      // Add to document
       document.body.appendChild(link);
+
+      console.log(`[CVExport] Triggering download for: ${filename}`);
+
+      // Trigger download
       link.click();
 
-      // Cleanup
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      // Cleanup after a short delay
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        console.log(`[CVExport] Cleanup completed`);
+      }, 100);
+
+      console.log(`[CVExport] ✅ Export successful!`);
 
     } catch (error) {
-      console.error('Export failed:', error);
-      alert(`Failed to export CV as ${format.toUpperCase()}. Please try again.`);
+      console.error('[CVExport] ❌ Export failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Failed to export CV as ${format.toUpperCase()}.\nError: ${errorMessage}\nPlease try again.`);
     } finally {
       setIsExporting(false);
       setExportFormat(null);

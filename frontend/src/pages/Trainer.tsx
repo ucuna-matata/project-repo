@@ -1,15 +1,36 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Award, ChevronRight, Loader2 } from 'lucide-react';
+import { Award, ChevronRight, Loader2, History } from 'lucide-react';
 import { useTrainerCategories, useTrainerQuestions, useSubmitTrainerAttempt } from '../hooks/useApi';
+import QuizResult from '../components/trainer/QuizResult';
+import TrainerHistory from '../components/trainer/TrainerHistory';
+
+interface QuizResultData {
+  score: number;
+  maxScore: number;
+  timeTaken?: number;
+  questions: Array<{
+    id: string;
+    text: string;
+    options: string[];
+    correct: number;
+  }>;
+  answers: Array<{
+    question_id: string;
+    selected: number;
+    correct: number;
+  }>;
+}
 
 export default function Trainer() {
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState<'quiz' | 'history'>('quiz');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [started, setStarted] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [startTime, setStartTime] = useState<number>(0);
+  const [quizResult, setQuizResult] = useState<QuizResultData | null>(null);
 
   const { data: categoriesData, isLoading: loadingCategories } = useTrainerCategories();
   const { data: questionsData, isLoading: loadingQuestions, refetch: refetchQuestions } =
@@ -24,11 +45,13 @@ export default function Trainer() {
     setAnswers([]);
     setCurrentQuestion(0);
     setStarted(false);
+    setQuizResult(null);
   };
 
   const handleStartQuiz = () => {
     setStarted(true);
     setStartTime(Date.now());
+    setQuizResult(null);
     refetchQuestions();
   };
 
@@ -50,6 +73,18 @@ export default function Trainer() {
       return acc + (answer === questions[idx]?.correct ? 1 : 0);
     }, 0);
 
+    const resultData: QuizResultData = {
+      score,
+      maxScore: questions.length,
+      timeTaken,
+      questions,
+      answers: answers.map((a, idx) => ({
+        question_id: questions[idx]?.id,
+        selected: a,
+        correct: questions[idx]?.correct,
+      })),
+    };
+
     try {
       await submitAttempt.mutateAsync({
         module_key: selectedCategory,
@@ -57,23 +92,33 @@ export default function Trainer() {
         max_score: questions.length,
         metadata: {
           questions,
-          answers: answers.map((a, idx) => ({
-            question_id: questions[idx]?.id,
-            selected: a,
-            correct: questions[idx]?.correct,
-          })),
+          answers: resultData.answers,
           time_taken: timeTaken,
         },
       });
 
-      alert(`Your score: ${score}/${questions.length}`);
+      // Показуємо результати
+      setQuizResult(resultData);
       setStarted(false);
-      setAnswers([]);
-      setCurrentQuestion(0);
     } catch (error) {
       console.error('Failed to submit results:', error);
       alert('Failed to submit results. Please try again.');
     }
+  };
+
+  const handleRetry = () => {
+    setAnswers([]);
+    setCurrentQuestion(0);
+    setQuizResult(null);
+    handleStartQuiz();
+  };
+
+  const handleChangeCategory = () => {
+    setSelectedCategory('');
+    setAnswers([]);
+    setCurrentQuestion(0);
+    setStarted(false);
+    setQuizResult(null);
   };
 
   if (loadingCategories) {
@@ -91,7 +136,51 @@ export default function Trainer() {
         <p className="mt-2 text-gray-600">Test your knowledge and skills</p>
       </div>
 
-      {!selectedCategory ? (
+      {/* Tabs */}
+      <div className="mb-6 border-b border-gray-200">
+        <div className="flex gap-8">
+          <button
+            onClick={() => setActiveTab('quiz')}
+            className={`pb-4 px-2 font-medium text-sm border-b-2 transition-colors ${
+              activeTab === 'quiz'
+                ? 'border-yellow-600 text-yellow-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Award className="h-4 w-4" />
+              <span>Take Quiz</span>
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`pb-4 px-2 font-medium text-sm border-b-2 transition-colors ${
+              activeTab === 'history'
+                ? 'border-yellow-600 text-yellow-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <History className="h-4 w-4" />
+              <span>History</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {activeTab === 'history' ? (
+        <TrainerHistory />
+      ) : quizResult ? (
+        <QuizResult
+          score={quizResult.score}
+          maxScore={quizResult.maxScore}
+          timeTaken={quizResult.timeTaken}
+          questions={quizResult.questions}
+          answers={quizResult.answers}
+          onRetry={handleRetry}
+          onChangeCategory={handleChangeCategory}
+        />
+      ) : !selectedCategory ? (
         <div className="bg-white p-8 rounded-lg shadow max-w-2xl mx-auto">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">
             Select a Category

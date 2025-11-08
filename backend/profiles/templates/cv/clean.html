@@ -173,13 +173,19 @@
                 {% endif %}
             </div>
 
-            {% if sections.personal.links %}
+            {% if sections.personal.linkedin or sections.personal.website or sections.personal.links %}
                 <div class="links">
+                    {% if sections.personal.linkedin %}
+                        <a href="{{ sections.personal.linkedin }}">LinkedIn</a>
+                    {% endif %}
                     {% if sections.personal.links.linkedin %}
                         <a href="{{ sections.personal.links.linkedin }}">LinkedIn</a>
                     {% endif %}
                     {% if sections.personal.links.github %}
                         <a href="{{ sections.personal.links.github }}">GitHub</a>
+                    {% endif %}
+                    {% if sections.personal.website %}
+                        <a href="{{ sections.personal.website }}">Website</a>
                     {% endif %}
                     {% if sections.personal.links.portfolio %}
                         <a href="{{ sections.personal.links.portfolio }}">Portfolio</a>
@@ -203,9 +209,9 @@
                 {% for exp in sections.experience %}
                     <div class="entry">
                         <div class="entry-header">
-                            <h3 class="entry-title">{{ exp.title }}</h3>
+                            <h3 class="entry-title">{% firstof exp.position exp.title "Position" %}</h3>
                             <span class="entry-date">
-                                {{ exp.start }}{% if exp.end %} - {{ exp.end }}{% else %} - Present{% endif %}
+                                {% firstof exp.start_date exp.start "" %}{% if exp.end_date or exp.end %} - {% firstof exp.end_date exp.end "" %}{% else %} - Present{% endif %}
                             </span>
                         </div>
                         <div class="entry-subtitle">{{ exp.company }}</div>
@@ -225,7 +231,13 @@
                     <div class="entry">
                         <div class="entry-header">
                             <h3 class="entry-title">{{ edu.degree }}</h3>
-                            <span class="entry-date">{{ edu.year }}</span>
+                            <span class="entry-date">
+                                {% if edu.start_date and edu.end_date %}
+                                    {{ edu.start_date }} - {{ edu.end_date }}
+                                {% elif edu.year %}
+                                    {{ edu.year }}
+                                {% endif %}
+                            </span>
                         </div>
                         <div class="entry-subtitle">{{ edu.institution }}</div>
                         {% if edu.description %}
@@ -260,14 +272,18 @@
                 <h2>Projects</h2>
                 {% for project in sections.projects %}
                     <div class="entry">
-                        <h3 class="entry-title">{{ project.title }}</h3>
+                        <h3 class="entry-title">{% firstof project.name project.title "Project" %}</h3>
                         {% if project.description %}
                             <div class="entry-description">{{ project.description }}</div>
                         {% endif %}
-                        {% if project.tech %}
+                        {% if project.technologies %}
+                            <div class="project-tech">Technologies: {{ project.technologies|join:", " }}</div>
+                        {% elif project.tech %}
                             <div class="project-tech">Technologies: {{ project.tech }}</div>
                         {% endif %}
-                        {% if project.link %}
+                        {% if project.url %}
+                            <div class="project-link">{{ project.url }}</div>
+                        {% elif project.link %}
                             <div class="project-link">{{ project.link }}</div>
                         {% endif %}
                     </div>

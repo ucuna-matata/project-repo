@@ -1,12 +1,45 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Download, Trash2, Globe, Shield, Bell, User } from 'lucide-react';
+import { Download, Trash2, Globe, Shield, Bell, User, Save } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import * as api from '../services/api';
+import { useProfile, useUpdateProfile } from '../hooks/useApi';
 
 export default function Settings() {
   const { t, i18n } = useTranslation();
   const [locale, setLocale] = useState(i18n.language);
+
+  // Profile data
+  const { data: profile, isLoading: profileLoading } = useProfile();
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [summary, setSummary] = useState('');
+
+  // Update local state when profile loads
+  useEffect(() => {
+    if (profile) {
+      setFullName(profile.full_name || '');
+      setEmail(profile.email || '');
+      setSummary(profile.summary || '');
+    }
+  }, [profile]);
+
+  const updateProfileMutation = useUpdateProfile();
+
+  const handleProfileUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await updateProfileMutation.mutateAsync({
+        full_name: fullName,
+        email: email,
+        summary: summary,
+      });
+      alert('✓ Profile updated successfully!');
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      alert('✗ Failed to update profile. Please try again.');
+    }
+  };
 
   const handleLocaleChange = (newLocale: string) => {
     setLocale(newLocale);
@@ -92,6 +125,75 @@ export default function Settings() {
             <p className="text-lg text-slate-600">Manage your account and preferences</p>
           </div>
         </div>
+      </div>
+
+      {/* Profile Information */}
+      <div className="glass-effect p-8 rounded-2xl">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="bg-gradient-to-br from-primary-600 to-accent-600 p-3 rounded-xl shadow-lg">
+            <User className="h-6 w-6 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900">Profile Information</h2>
+        </div>
+
+        {profileLoading ? (
+          <div className="flex justify-center py-8">
+            <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full"></div>
+          </div>
+        ) : (
+          <form onSubmit={handleProfileUpdate} className="space-y-6">
+            <div>
+              <label htmlFor="fullName" className="block text-sm font-medium text-slate-700 mb-2">
+                Full Name
+              </label>
+              <input
+                type="text"
+                id="fullName"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-primary-400 focus:ring-2 focus:ring-primary-200 transition-all"
+                placeholder="Enter your full name"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
+                Email Address
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-primary-400 focus:ring-2 focus:ring-primary-200 transition-all"
+                placeholder="your.email@example.com"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="summary" className="block text-sm font-medium text-slate-700 mb-2">
+                Professional Summary
+              </label>
+              <textarea
+                id="summary"
+                value={summary}
+                onChange={(e) => setSummary(e.target.value)}
+                rows={4}
+                className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-primary-400 focus:ring-2 focus:ring-primary-200 transition-all resize-none"
+                placeholder="Brief description about yourself and your professional background..."
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={updateProfileMutation.isPending}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-600 to-accent-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Save className="h-5 w-5" />
+              {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
+            </button>
+          </form>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
