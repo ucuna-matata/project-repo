@@ -157,7 +157,10 @@ export function useSubmitInterview() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: interviewService.submitInterview,
-    onSuccess: (_, sessionId) => {
+    onSuccess: (result, sessionId) => {
+      // Update the cache with the completed session data
+      queryClient.setQueryData(['interview-session', sessionId], result);
+      // Also invalidate to ensure fresh data
       queryClient.invalidateQueries({ queryKey: ['interview-session', sessionId] });
       queryClient.invalidateQueries({ queryKey: ['interview-sessions'] });
     },

@@ -7,11 +7,16 @@ import { CheckCircle, XCircle, Lightbulb, TrendingUp, RefreshCw, Star } from 'lu
 export default function InterviewResults() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
-  const { data: session, isLoading } = useInterviewSession(sessionId || '');
+  const { data: session, isLoading, error } = useInterviewSession(sessionId || '');
   const [isRetaking, setIsRetaking] = useState(false);
 
   useEffect(() => {
+    console.log('InterviewResults mounted:', { sessionId, session, isLoading, error });
+  }, [sessionId, session, isLoading, error]);
+
+  useEffect(() => {
     if (!sessionId) {
+      console.log('No sessionId, navigating to /interview');
       navigate('/interview');
     }
   }, [sessionId, navigate]);
@@ -39,17 +44,56 @@ export default function InterviewResults() {
     );
   }
 
-  if (!session || session.status !== 'completed') {
+  if (error) {
+    console.error('Error loading interview session:', error);
     return (
       <div className="px-4 py-6">
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-          <p className="text-yellow-700">Interview not completed or not found.</p>
+        <div className="bg-red-50 border-l-4 border-red-400 p-4">
+          <p className="text-red-700">Error loading interview results. Please try again.</p>
+          <button
+            onClick={() => navigate('/interview')}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Back to Interview
+          </button>
         </div>
       </div>
     );
   }
 
-  const { score, ai_feedback, checklist, questions, answers } = session;
+  if (!session) {
+    console.log('No session data available');
+    return (
+      <div className="px-4 py-6">
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+          <p className="text-yellow-700">Interview session not found.</p>
+          <button
+            onClick={() => navigate('/interview')}
+            className="mt-4 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
+          >
+            Back to Interview
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Temporarily allow viewing results even if status is not 'completed' (for debugging)
+  console.log('Session status:', session.status, 'Score:', session.score);
+
+  const {
+    score,
+    ai_feedback,
+    checklist,
+    questions = [],
+    answers = [],
+    detailed_review = [],
+    can_retake = true
+  } = session;
+
+  // Safely convert score to number
+  const scoreValue = score != null ? Number(score) : 0;
+  console.log('Score value:', scoreValue, 'Type:', typeof scoreValue);
 
   return (
     <div className="px-4 py-6 max-w-4xl mx-auto">
@@ -57,6 +101,9 @@ export default function InterviewResults() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Interview Results</h1>
         <p className="mt-2 text-gray-600">Here's how you performed</p>
+        {session.status !== 'completed' && (
+          <p className="mt-1 text-sm text-yellow-600">⚠️ Status: {session.status}</p>
+        )}
       </div>
 
       {/* Score Card */}
@@ -64,7 +111,7 @@ export default function InterviewResults() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-blue-100 text-sm font-medium">Overall Score</p>
-            <p className="text-5xl font-bold mt-2">{score?.toFixed(0) || 0}%</p>
+            <p className="text-5xl font-bold mt-2">{scoreValue.toFixed(0)}%</p>
           </div>
           <div className="text-6xl opacity-20">
             <TrendingUp className="h-24 w-24" />
@@ -186,13 +233,13 @@ export default function InterviewResults() {
       )}
 
       {/* Detailed Review per Question */}
-      {session.detailed_review && session.detailed_review.length > 0 && (
+      {detailed_review && detailed_review.length > 0 && (
         <div className="mt-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Detailed Question Review</h2>
           <div className="space-y-6">
-            {session.detailed_review.map((review, index) => {
-              const question = session.questions.find(q => q.id === review.question_id);
-              const answer = session.answers.find(a => a.question_id === review.question_id);
+            {detailed_review.map((review, index) => {
+              const question = questions?.find(q => q.id === review.question_id);
+              const answer = answers?.find(a => a.question_id === review.question_id);
 
               return (
                 <div key={review.question_id} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
@@ -243,7 +290,7 @@ export default function InterviewResults() {
 
       {/* Actions */}
       <div className="mt-8 flex gap-4 justify-center flex-wrap">
-        {session.can_retake !== false && (
+        {can_retake !== false && (
           <button
             onClick={handleRetake}
             disabled={isRetaking}
