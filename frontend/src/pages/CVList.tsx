@@ -79,7 +79,7 @@ export default function CVList() {
         </div>
         <button
           onClick={handleCreate}
-          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#226A74] hover:bg-[#1B575F]"
         >
           <Plus className="h-5 w-5 mr-2" />
           New CV

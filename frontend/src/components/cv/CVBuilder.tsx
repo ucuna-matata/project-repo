@@ -410,7 +410,7 @@ export default function CVBuilder({ initialData, cvId, onSave, onGenerate }: CVB
                     description: '',
                   })
                 }
-                className="inline-flex items-center px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="inline-flex items-center px-3 py-1 text-sm bg-[#226A74] text-white rounded-md hover:bg-[#1B575F]"
               >
                 <Plus className="h-4 w-4 mr-1" />
                 Add Education
@@ -541,7 +541,7 @@ export default function CVBuilder({ initialData, cvId, onSave, onGenerate }: CVB
                     technologies: [],
                   })
                 }
-                className="inline-flex items-center px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="inline-flex items-center px-3 py-1 text-sm bg-[#226A74] text-white rounded-md hover:bg-[#1B575F]"
               >
                 <Plus className="h-4 w-4 mr-1" />
                 Add Project
