@@ -262,10 +262,12 @@ def generate_cv_with_ai(request):
     job_description = request.data.get('job_description', '')
     cv_title = request.data.get('title', 'AI Generated CV')
     template_key = request.data.get('template_key', 'modern')
+    replace_existing = request.data.get('replace_existing', True)  # By default, replace old CV
+    cv_id_to_update = request.data.get('cv_id', None)  # Optional: update specific CV
 
     # Prepare profile data for AI
     profile_data = {
-        'full_name': profile.full_name or request.user.get_full_name() or request.user.email,
+        'full_name': request.user.full_name or request.user.email,
         'email': request.user.email,
         'experience': profile.experience or [],
         'education': profile.education or [],
@@ -299,6 +301,77 @@ def generate_cv_with_ai(request):
                 })
         skills_data = all_skills
 
+    # Update profile with AI-generated content and track changes
+    profile_updated = False
+    changes = []
+    current_time = timezone.now().isoformat()
+
+    # Update summary
+    if generated_content.get('summary'):
+        old_summary = profile.summary
+        if old_summary != generated_content['summary']:
+            profile.summary = generated_content['summary']
+            changes.append({
+                'field': 'summary',
+                'old_value': old_summary,
+                'new_value': generated_content['summary'],
+                'ts': current_time,
+                'source': 'ai_generation'
+            })
+            profile_updated = True
+
+    # Update experience
+    if generated_content.get('experience'):
+        old_experience = profile.experience or []
+        if old_experience != generated_content['experience']:
+            profile.experience = generated_content['experience']
+            changes.append({
+                'field': 'experience',
+                'old_value': old_experience,
+                'new_value': generated_content['experience'],
+                'ts': current_time,
+                'source': 'ai_generation'
+            })
+            profile_updated = True
+
+    # Update projects
+    if generated_content.get('projects'):
+        old_projects = profile.projects or []
+        if old_projects != generated_content['projects']:
+            profile.projects = generated_content['projects']
+            changes.append({
+                'field': 'projects',
+                'old_value': old_projects,
+                'new_value': generated_content['projects'],
+                'ts': current_time,
+                'source': 'ai_generation'
+            })
+            profile_updated = True
+
+    # Update skills
+    if skills_data:
+        old_skills = profile.skills or []
+        if old_skills != skills_data:
+            profile.skills = skills_data
+            changes.append({
+                'field': 'skills',
+                'old_value': old_skills,
+                'new_value': skills_data,
+                'ts': current_time,
+                'source': 'ai_generation'
+            })
+            profile_updated = True
+
+    # Save changes to history log
+    if changes:
+        history = profile.history_log or []
+        history.extend(changes)
+        profile.history_log = history[-100:]  # Keep last 100 changes
+        profile_updated = True
+
+    if profile_updated:
+        profile.save()
+
     # Create CV with generated content
     cv_sections = {
         'personal': {
@@ -317,26 +390,138 @@ def generate_cv_with_ai(request):
         'certifications': []
     }
 
-    # Create new CV
-    cv = CV.objects.create(
-        user=request.user,
-        title=cv_title,
-        template_key=template_key,
-        sections=cv_sections
-    )
+    # Handle CV creation/update based on parameters
+    cv = None
+    is_update = False
+
+    if cv_id_to_update:
+        # Update specific CV
+        try:
+            cv = CV.objects.get(id=cv_id_to_update, user=request.user)
+            cv.title = cv_title
+            cv.template_key = template_key
+            cv.sections = cv_sections
+            cv.version += 1
+            cv.save()
+            is_update = True
+        except CV.DoesNotExist:
+            return Response(
+                {'error': 'CV not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    elif replace_existing:
+        # Delete all existing CVs for this user before creating new one
+        deleted_count = CV.objects.filter(user=request.user).delete()[0]
+
+        # Create new CV
+        cv = CV.objects.create(
+            user=request.user,
+            title=cv_title,
+            template_key=template_key,
+            sections=cv_sections
+        )
+    else:
+        # Just create a new CV without deleting old ones
+        cv = CV.objects.create(
+            user=request.user,
+            title=cv_title,
+            template_key=template_key,
+            sections=cv_sections
+        )
 
     # Create audit event
+    audit_payload = {
+        'cv_id': str(cv.id),
+        'title': cv_title,
+        'has_job_description': bool(job_description),
+        'profile_updated': profile_updated,
+        'fields_updated': [change['field'] for change in changes] if changes else [],
+        'is_update': is_update
+    }
+
+    if replace_existing and not cv_id_to_update:
+        audit_payload['deleted_old_cvs'] = True
+
     AuditEvent.objects.create(
         user=request.user,
         type='cv_ai_generate',
-        payload={
-            'cv_id': str(cv.id),
-            'title': cv_title,
-            'has_job_description': bool(job_description)
-        }
+        payload=audit_payload
     )
 
-    return Response(CVSerializer(cv).data, status=status.HTTP_201_CREATED)
+    # Return CV data with profile update information
+    response_data = CVSerializer(cv).data
+    response_data['profile_updated'] = profile_updated
+    if changes:
+        response_data['profile_changes'] = changes
+
+    # Return appropriate status code
+    status_code = status.HTTP_200_OK if is_update else status.HTTP_201_CREATED
+    return Response(response_data, status=status_code)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def generate_cv_preview(request):
+    """Generate CV content preview using AI without saving to database."""
+    from .services.cv_ai_service import generate_cv_content
+
+    # Get profile
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+
+    # Get job description from request if provided
+    job_description = request.data.get('job_description', '')
+
+    # Prepare profile data for AI
+    profile_data = {
+        'full_name': request.user.full_name or request.user.email,
+        'email': request.user.email,
+        'experience': profile.experience or [],
+        'education': profile.education or [],
+        'skills': profile.skills or [],
+        'projects': profile.projects or [],
+        'summary': profile.summary or '',
+        'links': profile.links or {}
+    }
+
+    # Generate CV content with AI
+    generated_content = generate_cv_content(profile_data, job_description)
+
+    # Check for errors
+    if 'error' in generated_content:
+        return Response(
+            {'error': generated_content['error'], 'message': generated_content.get('message', '')},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
+
+    # Process skills format
+    skills_data = generated_content.get('skills', {})
+    if isinstance(skills_data, dict):
+        # Convert categorized skills to flat list
+        all_skills = []
+        for category, skill_list in skills_data.items():
+            all_skills.extend(skill_list)
+        skills_data = all_skills
+
+    # Return preview data in CVFormData format
+    preview_data = {
+        'personal': {
+            'name': profile_data['full_name'],
+            'email': profile_data['email'],
+            'phone': profile_data['links'].get('phone', ''),
+            'location': profile_data['links'].get('location', ''),
+            'linkedin': profile_data['links'].get('linkedin', ''),
+            'website': profile_data['links'].get('website', ''),
+        },
+        'summary': generated_content.get('summary', ''),
+        'experience': generated_content.get('experience', []),
+        'education': profile_data['education'],
+        'skills': skills_data,
+        'projects': generated_content.get('projects', []),
+        'languages': [],
+        'certifications': []
+    }
+
+    return Response(preview_data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])

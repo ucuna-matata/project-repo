@@ -89,20 +89,16 @@ export default function CVMaster() {
 
   const handleGenerate = useCallback(async (data: Partial<CVFormData>) => {
     try {
-      // Call AI generation endpoint
-      const generatedCV = await profileService.generateCV(data);
-
-      // Load the generated CV
-      setCurrentCVId(generatedCV.id);
-      navigate(`/cv-master?id=${generatedCV.id}`, { replace: true });
-
-      alert(t('cv.cvGenerated'));
+      // Call AI generation preview endpoint - returns data without saving
+      const payload = {
+        job_description: data.summary || '', // Optionally use summary as job description
+      };
+      return await profileService.generateCVPreview(payload);
     } catch (error) {
       console.error('Failed to generate CV:', error);
-      alert(t('cv.generateFailed'));
       throw error;
     }
-  }, [navigate, t]);
+  }, [t]);
 
   if (loading) {
     return (

@@ -44,15 +44,21 @@ def generate_interview_feedback(session):
         session: InterviewSession object with questions and answers
 
     Returns:
-        dict: {strengths: list, weaknesses: list, tips: list, overall_assessment: str}
+        tuple: (overall_feedback_dict, detailed_review_list)
+        - overall_feedback: {strengths, weaknesses, tips, overall_assessment, recommendation}
+        - detailed_review: [{question_id, answer_review, score, suggestions}]
     """
     if not client:
-        return {
-            'strengths': ['Completed the interview'],
-            'weaknesses': ['AI feedback unavailable - API key not configured'],
-            'tips': ['Configure GROQ_API_KEY to enable AI feedback'],
-            'overall_assessment': 'Unable to provide detailed feedback without AI configuration.'
-        }
+        return (
+            {
+                'strengths': ['Completed the interview'],
+                'weaknesses': ['AI feedback unavailable - API key not configured'],
+                'tips': ['Configure GROQ_API_KEY to enable AI feedback'],
+                'overall_assessment': 'Unable to provide detailed feedback without AI configuration.',
+                'recommendation': 'Try again after configuring the AI system.'
+            },
+            []
+        )
 
     # Build context for AI
     questions_and_answers = []
@@ -60,24 +66,36 @@ def generate_interview_feedback(session):
         question = next((q for q in session.questions if q['id'] == answer['question_id']), None)
         if question:
             questions_and_answers.append({
+                'question_id': answer['question_id'],
                 'question': question['text'],
                 'answer': answer['text'],
                 'category': question.get('category', 'General'),
                 'expected_points': question.get('expected_points', [])
             })
 
-    # Create prompt for AI
-    prompt = f"""You are an expert technical interviewer. Analyze the following interview responses and provide detailed feedback.
+    # Create prompt for AI - requesting both overall and detailed feedback
+    prompt = f"""You are an expert technical interviewer. Analyze the following interview responses and provide comprehensive feedback.
 
 Interview Questions and Answers:
 {json.dumps(questions_and_answers, indent=2)}
 
 Please provide feedback in JSON format with the following structure:
 {{
-    "strengths": [list of 3-5 specific strengths in the answers],
-    "weaknesses": [list of 3-5 specific areas for improvement],
-    "tips": [list of 3-5 actionable tips for improvement],
-    "overall_assessment": "A brief 2-3 sentence overall assessment"
+    "overall_feedback": {{
+        "strengths": [list of 3-5 specific strengths in the answers],
+        "weaknesses": [list of 3-5 specific areas for improvement],
+        "tips": [list of 3-5 actionable tips for improvement],
+        "overall_assessment": "A brief 2-3 sentence overall assessment",
+        "recommendation": "Should they retake the interview? Suggest next steps (1-2 sentences)"
+    }},
+    "detailed_review": [
+        {{
+            "question_id": "the question id",
+            "answer_review": "Detailed review of this specific answer (2-3 sentences)",
+            "score": numerical score from 0-10,
+            "suggestions": "Specific suggestions for improvement (1-2 sentences)"
+        }}
+    ]
 }}
 
 Focus on:
@@ -87,7 +105,7 @@ Focus on:
 4. Coverage of key concepts
 5. Practical examples and real-world understanding
 
-Provide specific, constructive feedback that helps the candidate improve."""
+Provide specific, constructive feedback that helps the candidate improve. Be encouraging but honest."""
 
     try:
         response = client.chat.completions.create(
@@ -97,7 +115,7 @@ Provide specific, constructive feedback that helps the candidate improve."""
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,
-            max_tokens=1500
+            max_tokens=2500
         )
 
         # Parse AI response
@@ -109,33 +127,58 @@ Provide specific, constructive feedback that helps the candidate improve."""
             json_start = ai_response.find('{')
             json_end = ai_response.rfind('}') + 1
             if json_start >= 0 and json_end > json_start:
-                feedback = json.loads(ai_response[json_start:json_end])
-                return feedback
+                feedback_data = json.loads(ai_response[json_start:json_end])
+                overall_feedback = feedback_data.get('overall_feedback', {})
+                detailed_review = feedback_data.get('detailed_review', [])
+
+                # Ensure all required fields exist
+                if not overall_feedback.get('recommendation'):
+                    score = session.score or 0
+                    if score >= 80:
+                        overall_feedback['recommendation'] = "Great job! You're ready for real interviews. Consider practicing more advanced topics."
+                    elif score >= 60:
+                        overall_feedback['recommendation'] = "Good effort! Practice the weak areas and retake to improve your confidence."
+                    else:
+                        overall_feedback['recommendation'] = "Keep practicing! Review the concepts and retake the interview to build your skills."
+
+                return (overall_feedback, detailed_review)
             else:
                 # Fallback if JSON not found
-                return {
-                    'strengths': ['Completed all questions', 'Showed effort in responses'],
-                    'weaknesses': ['Could provide more detailed examples'],
-                    'tips': ['Practice explaining technical concepts with real-world examples'],
-                    'overall_assessment': ai_response[:200]
-                }
+                return (
+                    {
+                        'strengths': ['Completed all questions', 'Showed effort in responses'],
+                        'weaknesses': ['Could provide more detailed examples'],
+                        'tips': ['Practice explaining technical concepts with real-world examples'],
+                        'overall_assessment': ai_response[:200],
+                        'recommendation': 'Review the feedback and consider retaking to improve.'
+                    },
+                    []
+                )
         except json.JSONDecodeError:
             # Fallback with raw AI response
-            return {
-                'strengths': ['Completed the interview'],
-                'weaknesses': ['Response analysis in progress'],
-                'tips': ['Continue practicing interview questions'],
-                'overall_assessment': ai_response[:500] if ai_response else 'Feedback generated successfully.'
-            }
+            return (
+                {
+                    'strengths': ['Completed the interview'],
+                    'weaknesses': ['Response analysis in progress'],
+                    'tips': ['Continue practicing interview questions'],
+                    'overall_assessment': ai_response[:500] if ai_response else 'Feedback generated successfully.',
+                    'recommendation': 'Practice more and retake when ready.'
+                },
+                []
+            )
 
     except Exception as e:
         print(f"Error generating AI feedback: {e}")
-        return {
-            'strengths': ['Completed the interview session'],
-            'weaknesses': ['AI feedback generation encountered an error'],
-            'tips': ['Keep practicing and review fundamental concepts'],
-            'overall_assessment': f'Feedback generation failed: {str(e)[:100]}'
-        }
+        return (
+            {
+                'strengths': ['Completed the interview session'],
+                'weaknesses': ['AI feedback generation encountered an error'],
+                'tips': ['Keep practicing and review fundamental concepts'],
+                'overall_assessment': f'Feedback generation failed: {str(e)[:100]}',
+                'recommendation': 'Technical issue occurred. Please try again.'
+            },
+            []
+        )
 
 
 def get_ai_hint(question_text, current_answer=""):

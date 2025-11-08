@@ -164,6 +164,16 @@ export async function generateCV(payload: Record<string, unknown>, signal?: Abor
   });
   return handleResponse(res);
 }
+export async function generateCVPreview(payload: Record<string, unknown>, signal?: AbortSignal) {
+  const res = await fetch(`${API_ORIGIN}/api/cvs/generate-preview/`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: jsonHeaders(),
+    body: JSON.stringify(payload),
+    signal,
+  });
+  return handleResponse(res);
+}
 export async function createInterviewSession(payload: Record<string, unknown>) {
   const res = await fetch(`${API_ORIGIN}/api/interview/sessions/`, {
     method: 'POST',
