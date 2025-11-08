@@ -24,7 +24,7 @@ export default function CVList() {
       setError(null);
     } catch (err) {
       console.error('Failed to load CVs:', err);
-      setError('Failed to load CVs. Please try again.');
+      setError(t('cv.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -39,7 +39,7 @@ export default function CVList() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this CV?')) {
+    if (!confirm(t('cv.deleteConfirm'))) {
       return;
     }
 
@@ -48,7 +48,7 @@ export default function CVList() {
       setCvs(cvs.filter(cv => cv.id !== id));
     } catch (err) {
       console.error('Failed to delete CV:', err);
-      alert('Failed to delete CV. Please try again.');
+      alert(t('cv.deleteFailed'));
     }
   };
 
@@ -74,15 +74,15 @@ export default function CVList() {
     <div className="px-4 py-6">
       <div className="mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{t('cv.title') || 'My CVs'}</h1>
-          <p className="mt-2 text-gray-600">Create, manage, and export your professional CVs</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('cv.title')}</h1>
+          <p className="mt-2 text-gray-600">{t('cv.manageSubtitle')}</p>
         </div>
         <button
           onClick={handleCreate}
           className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
         >
           <Plus className="h-5 w-5 mr-2" />
-          New CV
+          {t('cv.newCV')}
         </button>
       </div>
 
@@ -99,14 +99,14 @@ export default function CVList() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No CVs yet</h3>
-          <p className="text-gray-600 mb-6">Get started by creating your first professional CV</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">{t('cv.noCVs')}</h3>
+          <p className="text-gray-600 mb-6">{t('cv.noCVsDescription')}</p>
           <button
             onClick={handleCreate}
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
           >
             <Plus className="h-5 w-5 mr-2" />
-            Create First CV
+            {t('cv.createFirst')}
           </button>
         </div>
       ) : (
@@ -120,13 +120,13 @@ export default function CVList() {
                     <div className="flex items-center gap-4 text-sm text-gray-600">
                       <span className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        Updated: {formatDate(cv.updated_at)}
+                        {t('cv.updated')}: {formatDate(cv.updated_at)}
                       </span>
                       <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium">
                         {cv.template_key}
                       </span>
                       <span className="text-gray-500">
-                        v{cv.version}
+                        {t('cv.version')}{cv.version}
                       </span>
                     </div>
                   </div>
@@ -134,21 +134,21 @@ export default function CVList() {
                   <div className="flex gap-2">
                     <button
                       className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded"
-                      title="View CV"
+                      title={t('cv.viewCV')}
                     >
                       <Eye className="h-5 w-5" />
                     </button>
                     <button
                       onClick={() => handleEdit(cv.id)}
                       className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded"
-                      title="Edit CV"
+                      title={t('cv.editCV')}
                     >
                       <Edit className="h-5 w-5" />
                     </button>
                     <button
                       onClick={() => handleDelete(cv.id)}
                       className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded"
-                      title="Delete CV"
+                      title={t('cv.deleteCV')}
                     >
                       <Trash2 className="h-5 w-5" />
                     </button>
@@ -158,7 +158,7 @@ export default function CVList() {
                 <div className="border-t pt-4">
                   <div className="flex justify-between items-center">
                     <div className="text-sm text-gray-600">
-                      <p className="mb-1">Export this CV:</p>
+                      <p className="mb-1">{t('cv.exportThis')}</p>
                     </div>
                     <CVExportButtons cvId={cv.id} cvTitle={cv.title} />
                   </div>
@@ -171,4 +171,3 @@ export default function CVList() {
     </div>
   );
 }
-
