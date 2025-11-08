@@ -23,7 +23,7 @@ export default function Layout() {
   const navLinkClass = (path: string) => 
     `inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
       isActive(path)
-        ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg'
+        ? 'bg-gradient-to-r from-[#226A74] to-[#226A74] text-white shadow-lg'
         : 'text-slate-700 hover:bg-white/50 hover:text-primary-600'
     }`;
 
@@ -32,16 +32,17 @@ export default function Layout() {
       <nav className="glass-effect sticky top-0 z-50 border-b border-white/30">
         <div className="mx-auto max-w-7xl px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link to="/dashboard" className="flex items-center gap-2 group">
-              <div className="bg-gradient-to-br from-primary-600 to-accent-600 p-2 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
-                <Sparkles className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold gradient-text">Hirely</span>
+            <Link to="/dashboard" className="flex items-center">
+              <img 
+                src="logo.png" 
+                alt="Hirely" 
+                className="h-30 w-auto"
+              />
             </Link>
             <div className="flex items-center gap-2">
               <Link to="/dashboard" className={navLinkClass('/dashboard')}>
                 <Home className="h-5 w-5" />
-                <span>{t('nav.home') ?? 'Home'}</span>
+                <span>{t('Home') ?? 'Home'}</span>
               </Link>
               <Link to="/cv" className={navLinkClass('/cv')}>
                 <FileText className="h-5 w-5" />
