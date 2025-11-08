@@ -19,6 +19,14 @@ export interface AIFeedback {
   weaknesses: string[];
   tips: string[];
   overall_assessment: string;
+with  recommendation?: string;
+}
+
+export interface DetailedReview {
+  question_id: string;
+  answer_review: string;
+  score: number;
+  suggestions: string;
 }
 
 export interface ChecklistItem {
@@ -35,7 +43,9 @@ export interface InterviewSession {
   score?: number;
   feedback?: string;
   ai_feedback?: AIFeedback;
+  detailed_review?: DetailedReview[];
   checklist?: ChecklistItem[];
+  can_retake?: boolean;
   created_at: string;
   updated_at: string;
   completed_at?: string;
@@ -99,6 +109,13 @@ export const interviewService = {
       question_id: questionId,
       current_answer: currentAnswer || '',
     } as unknown as Record<string, unknown>);
+  },
+
+  /**
+   * Retake an interview (create new session based on completed one)
+   */
+  async retakeInterview(sessionId: string): Promise<InterviewSession> {
+    return api.retakeInterview(sessionId);
   },
 
   /**

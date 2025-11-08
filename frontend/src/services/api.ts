@@ -221,6 +221,14 @@ export async function getInterviewHint(sessionId: string, payload: Record<string
   });
   return handleResponse(res);
 }
+export async function retakeInterview(sessionId: string) {
+  const res = await fetch(`${API_ORIGIN}/api/interview/sessions/${sessionId}/retake/`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: jsonHeaders(),
+  });
+  return handleResponse(res);
+}
 export async function getTrainerCategories() {
   const res = await fetch(`${API_ORIGIN}/api/trainer/categories/`, {
     credentials: 'include',
