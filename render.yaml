@@ -10,7 +10,7 @@ services:
   - type: web
     name: hirely-backend
     env: python
-    plan: free
+    plan: starter
     region: frankfurt
     buildCommand: |
       cd backend
