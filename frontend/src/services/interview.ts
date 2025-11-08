@@ -14,6 +14,18 @@ export interface InterviewAnswer {
   time_spent: number;
 }
 
+export interface AIFeedback {
+  strengths: string[];
+  weaknesses: string[];
+  tips: string[];
+  overall_assessment: string;
+}
+
+export interface ChecklistItem {
+  criterion: string;
+  passed: boolean;
+}
+
 export interface InterviewSession {
   id: string;
   topic: string;
@@ -22,9 +34,14 @@ export interface InterviewSession {
   status: 'in_progress' | 'completed' | 'abandoned';
   score?: number;
   feedback?: string;
+  ai_feedback?: AIFeedback;
+  checklist?: ChecklistItem[];
   created_at: string;
   updated_at: string;
   completed_at?: string;
+  started_at?: string;
+  ended_at?: string;
+  duration_sec?: number;
 }
 
 export interface InterviewSessionCreate {
@@ -68,6 +85,20 @@ export const interviewService = {
    */
   async submitInterview(sessionId: string): Promise<InterviewSession> {
     return api.submitInterview(sessionId);
+  },
+
+  /**
+   * Get an AI hint for a specific question
+   */
+  async getHint(
+    sessionId: string,
+    questionId: string,
+    currentAnswer?: string
+  ): Promise<{ hint: string }> {
+    return api.getInterviewHint(sessionId, {
+      question_id: questionId,
+      current_answer: currentAnswer || '',
+    } as unknown as Record<string, unknown>);
   },
 
   /**

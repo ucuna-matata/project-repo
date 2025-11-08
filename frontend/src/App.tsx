@@ -6,13 +6,14 @@ import Dashboard from './pages/Dashboard';
 import CVMaster from './pages/CVMaster';
 import CVList from './pages/CVList';
 import Interview from './pages/Interview';
+import InterviewResults from './pages/InterviewResults';
 import Trainer from './pages/Trainer';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
 import AuthCallback from './pages/AuthCallback';
 import Layout from './components/layout/Layout';
 import { useQuery } from '@tanstack/react-query';
-import { authService } from './services/auth';
+import { authService } from './services';
 import './index.css';
 
 const queryClient = new QueryClient({
@@ -57,6 +58,7 @@ export default function App() {
               <Route path="cv" element={<CVList />} />
               <Route path="cv-list" element={<CVList />} />
               <Route path="cv-master" element={<CVMaster />} />
+              <Route path="interview/results/:sessionId" element={<InterviewResults />} />
               <Route path="interview" element={<Interview />} />
               <Route path="trainer" element={<Trainer />} />
               <Route path="settings" element={<Settings />} />

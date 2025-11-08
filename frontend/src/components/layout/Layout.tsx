@@ -1,8 +1,8 @@
 // frontend/src/components/layout/Layout.tsx
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Home, FileText, MessageSquare, Trophy, Settings as SettingsIcon, LogOut, Sparkles } from 'lucide-react';
-import { authService } from '../../services/auth';
+import { Home, FileText, MessageSquare, Trophy, Settings as SettingsIcon, LogOut } from 'lucide-react';
+import { authService } from '../../services';
 
 export default function Layout() {
   const { t } = useTranslation();
