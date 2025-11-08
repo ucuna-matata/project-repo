@@ -48,7 +48,7 @@ export default function Interview() {
       setTimeSpent(0);
     } catch (error) {
       console.error('Failed to create interview session:', error);
-      alert('Failed to start interview. Please try again.');
+      alert(t('interview.startFailed'));
     }
   };
 
@@ -73,7 +73,7 @@ export default function Interview() {
       }
     } catch (error) {
       console.error('Failed to save answer:', error);
-      alert('Failed to save answer. Please try again.');
+      alert(t('interview.saveFailed'));
     }
   };
 
@@ -92,14 +92,14 @@ export default function Interview() {
 
     try {
       await submitInterview.mutateAsync(sessionId);
-      alert('Interview submitted successfully!');
+      alert(t('interview.submitted'));
       setSessionId('');
       setSelectedTopic('');
       setCurrentQuestion(0);
       setCurrentAnswer('');
     } catch (error) {
       console.error('Failed to submit interview:', error);
-      alert('Failed to submit interview. Please try again.');
+      alert(t('interview.submitFailed'));
     }
   };
 
@@ -132,13 +132,13 @@ export default function Interview() {
     <div className="px-4 py-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">{t('interview.title')}</h1>
-        <p className="mt-2 text-gray-600">Practice your interview skills</p>
+        <p className="mt-2 text-gray-600">{t('interview.subtitle')}</p>
       </div>
 
       {!selectedTopic ? (
         <div className="bg-white p-8 rounded-lg shadow max-w-2xl mx-auto">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">
-            Select an Interview Topic
+            {t('interview.selectTopic')}
           </h2>
           <div className="grid gap-4">
             {topics.map((topic) => (
@@ -157,27 +157,27 @@ export default function Interview() {
       ) : !sessionId ? (
         <div className="bg-white p-8 rounded-lg shadow max-w-2xl mx-auto text-center">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-            Ready to start your interview?
+            {t('interview.readyToStart')}
           </h2>
           <p className="text-gray-600 mb-2">
-            Topic: <span className="font-semibold capitalize">{selectedTopic.replace('-', ' ')}</span>
+            {t('interview.topic')}: <span className="font-semibold capitalize">{selectedTopic.replace('-', ' ')}</span>
           </p>
           <p className="text-gray-600 mb-6">
-            You will be asked 5 questions. Answer thoughtfully and take your time.
+            {t('interview.questionsInfo')}
           </p>
           <div className="flex gap-4 justify-center">
             <button
               onClick={() => setSelectedTopic('')}
               className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
             >
-              Change Topic
+              {t('interview.changeTopic')}
             </button>
             <button
               onClick={handleStartInterview}
               disabled={createSession.isPending}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50"
             >
-              {createSession.isPending ? 'Starting...' : t('interview.start')}
+              {createSession.isPending ? t('interview.starting') : t('interview.start')}
             </button>
           </div>
         </div>
@@ -185,7 +185,7 @@ export default function Interview() {
         <div className="bg-white p-6 rounded-lg shadow max-w-3xl mx-auto">
           <div className="flex justify-between items-center mb-6">
             <span className="text-sm text-gray-600">
-              Question {currentQuestion + 1} of {questions.length}
+              {t('interview.questionOf')} {currentQuestion + 1} {t('interview.of')} {questions.length}
             </span>
             <div className="flex items-center text-gray-700">
               <Clock className="h-5 w-5 mr-2" />
@@ -202,7 +202,7 @@ export default function Interview() {
             onChange={(e) => setCurrentAnswer(e.target.value)}
             rows={8}
             className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            placeholder="Type your answer here..."
+            placeholder={t('interview.answerPlaceholder')}
           />
 
           <div className="mt-6 flex justify-between">
@@ -211,7 +211,7 @@ export default function Interview() {
               disabled={currentQuestion === 0}
               className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
             >
-              Previous
+              {t('interview.previous')}
             </button>
             {currentQuestion < questions.length - 1 ? (
               <button
@@ -219,7 +219,7 @@ export default function Interview() {
                 disabled={!currentAnswer.trim() || saveAnswer.isPending}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
               >
-                {saveAnswer.isPending ? 'Saving...' : 'Save & Next'}
+                {saveAnswer.isPending ? t('interview.saving') : t('interview.saveAndNext')}
               </button>
             ) : (
               <button
@@ -228,7 +228,7 @@ export default function Interview() {
                 className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 disabled:opacity-50"
               >
                 <Send className="h-4 w-4 mr-2" />
-                {submitInterview.isPending ? 'Submitting...' : t('interview.submit')}
+                {submitInterview.isPending ? t('interview.submitting') : t('interview.submit')}
               </button>
             )}
           </div>
@@ -237,4 +237,3 @@ export default function Interview() {
     </div>
   );
 }
-

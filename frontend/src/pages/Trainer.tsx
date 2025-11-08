@@ -102,7 +102,7 @@ export default function Trainer() {
       setStarted(false);
     } catch (error) {
       console.error('Failed to submit results:', error);
-      alert('Failed to submit results. Please try again.');
+      alert(t('trainer.submitFailed'));
     }
   };
 
@@ -132,8 +132,8 @@ export default function Trainer() {
   return (
     <div className="px-4 py-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">{t('trainer.title') || 'Trainer'}</h1>
-        <p className="mt-2 text-gray-600">Test your knowledge and skills</p>
+        <h1 className="text-3xl font-bold text-gray-900">{t('trainer.title')}</h1>
+        <p className="mt-2 text-gray-600">{t('trainer.subtitle')}</p>
       </div>
 
       {/* Tabs */}
@@ -149,7 +149,7 @@ export default function Trainer() {
           >
             <div className="flex items-center gap-2">
               <Award className="h-4 w-4" />
-              <span>Take Quiz</span>
+              <span>{t('trainer.takeQuiz')}</span>
             </div>
           </button>
           <button
@@ -162,7 +162,7 @@ export default function Trainer() {
           >
             <div className="flex items-center gap-2">
               <History className="h-4 w-4" />
-              <span>History</span>
+              <span>{t('trainer.history')}</span>
             </div>
           </button>
         </div>
@@ -183,7 +183,7 @@ export default function Trainer() {
       ) : !selectedCategory ? (
         <div className="bg-white p-8 rounded-lg shadow max-w-2xl mx-auto">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">
-            Select a Category
+            {t('trainer.selectCategory')}
           </h2>
           <div className="grid gap-4">
             {categories.map((category) => (
@@ -208,27 +208,27 @@ export default function Trainer() {
         <div className="bg-white p-8 rounded-lg shadow max-w-2xl mx-auto text-center">
           <Award className="h-16 w-16 text-yellow-600 mx-auto mb-4" />
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-            Ready to test your skills?
+            {t('trainer.readyToTest')}
           </h2>
           <p className="text-gray-600 mb-2">
-            Category: <span className="font-semibold capitalize">{selectedCategory.replace('-', ' ')}</span>
+            {t('trainer.category')}: <span className="font-semibold capitalize">{selectedCategory.replace('-', ' ')}</span>
           </p>
           <p className="text-gray-600 mb-6">
-            This quiz contains 10 questions.
+            {t('trainer.quizInfo')}
           </p>
           <div className="flex gap-4 justify-center">
             <button
               onClick={() => setSelectedCategory('')}
               className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
             >
-              Change Category
+              {t('trainer.changeCategory')}
             </button>
             <button
               onClick={handleStartQuiz}
               disabled={loadingQuestions}
               className="px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 font-medium disabled:opacity-50"
             >
-              {loadingQuestions ? 'Loading...' : 'Start Quiz'}
+              {loadingQuestions ? t('trainer.loading') : t('trainer.startQuiz')}
             </button>
           </div>
         </div>
@@ -240,7 +240,7 @@ export default function Trainer() {
         <div className="bg-white p-6 rounded-lg shadow max-w-3xl mx-auto">
           <div className="mb-6">
             <span className="text-sm text-gray-600">
-              Question {currentQuestion + 1} of {questions.length}
+              {t('trainer.questionOf')} {currentQuestion + 1} {t('trainer.of')} {questions.length}
             </span>
             <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
               <div
@@ -289,7 +289,7 @@ export default function Trainer() {
               disabled={currentQuestion === 0}
               className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
             >
-              Previous
+              {t('trainer.previous')}
             </button>
             {currentQuestion < questions.length - 1 ? (
               <button
@@ -297,7 +297,7 @@ export default function Trainer() {
                 disabled={answers[currentQuestion] === undefined}
                 className="px-4 py-2 bg-yellow-600 text-white rounded-md text-sm font-medium hover:bg-yellow-700 disabled:opacity-50"
               >
-                Next
+                {t('trainer.next')}
               </button>
             ) : (
               <button
@@ -305,7 +305,7 @@ export default function Trainer() {
                 disabled={answers[currentQuestion] === undefined || submitAttempt.isPending}
                 className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 disabled:opacity-50"
               >
-                {submitAttempt.isPending ? 'Submitting...' : 'Finish'}
+                {submitAttempt.isPending ? t('trainer.submitting') : t('trainer.finish')}
               </button>
             )}
           </div>
