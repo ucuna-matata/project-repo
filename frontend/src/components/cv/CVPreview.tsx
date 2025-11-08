@@ -89,7 +89,7 @@ function CVPreview({ data }: CVPreviewProps) {
   }
 
   return (
-    <div className="bg-gray-100 p-4 md:p-8">
+    <div className="bg-gray-100 p-4 md:p-8 transition-opacity duration-200">
       <div className="transform scale-90 origin-top">{renderTemplate}</div>
     </div>
   );

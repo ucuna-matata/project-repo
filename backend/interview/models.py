@@ -27,7 +27,9 @@ class InterviewSession(models.Model):
     # Results
     score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     checklist = models.JSONField(default=list, blank=True)  # [{criterion, passed, notes}]
-    ai_feedback = models.JSONField(default=dict, blank=True)  # {strengths, weaknesses, tips}
+    ai_feedback = models.JSONField(default=dict, blank=True)  # {strengths, weaknesses, tips, overall_assessment}
+    detailed_review = models.JSONField(default=list, blank=True)  # [{question_id, answer_review, score, suggestions}]
+    can_retake = models.BooleanField(default=True)  # Whether the user can retake this interview
 
     class Meta:
         db_table = 'interview_sessions'

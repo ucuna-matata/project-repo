@@ -1,18 +1,35 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useInterviewSession } from '../hooks/useApi';
-import { CheckCircle, XCircle, Lightbulb, TrendingUp } from 'lucide-react';
+import { interviewService } from '../services/interview';
+import { CheckCircle, XCircle, Lightbulb, TrendingUp, RefreshCw, Star } from 'lucide-react';
 
 export default function InterviewResults() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const { data: session, isLoading } = useInterviewSession(sessionId || '');
+  const [isRetaking, setIsRetaking] = useState(false);
 
   useEffect(() => {
     if (!sessionId) {
       navigate('/interview');
     }
   }, [sessionId, navigate]);
+
+  const handleRetake = async () => {
+    if (!sessionId) return;
+    
+    setIsRetaking(true);
+    try {
+      const newSession = await interviewService.retakeInterview(sessionId);
+      // Navigate to the new interview session
+      navigate(`/interview/session/${newSession.id}`);
+    } catch (error) {
+      console.error('Failed to retake interview:', error);
+      alert('Failed to start retake. Please try again.');
+      setIsRetaking(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -89,6 +106,21 @@ export default function InterviewResults() {
       {/* AI Feedback */}
       {ai_feedback && (
         <div className="space-y-6">
+          {/* Recommendation */}
+          {ai_feedback.recommendation && (
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg shadow-lg p-6 border-2 border-purple-200">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0">
+                  <Star className="h-8 w-8 text-purple-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-purple-900 mb-2">AI Recommendation</h2>
+                  <p className="text-purple-800 text-lg leading-relaxed">{ai_feedback.recommendation}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Strengths */}
           {ai_feedback.strengths && ai_feedback.strengths.length > 0 && (
             <div className="bg-green-50 rounded-lg shadow p-6">
@@ -153,8 +185,74 @@ export default function InterviewResults() {
         </div>
       )}
 
+      {/* Detailed Review per Question */}
+      {session.detailed_review && session.detailed_review.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Detailed Question Review</h2>
+          <div className="space-y-6">
+            {session.detailed_review.map((review, index) => {
+              const question = session.questions.find(q => q.id === review.question_id);
+              const answer = session.answers.find(a => a.question_id === review.question_id);
+
+              return (
+                <div key={review.question_id} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+                  <div className="mb-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Question {index + 1}
+                      </h3>
+                      <div className="flex items-center gap-2 bg-blue-100 px-3 py-1 rounded-full">
+                        <Star className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm font-bold text-blue-700">
+                          {review.score}/10
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-gray-700 mb-3">{question?.text}</p>
+                    {question?.category && (
+                      <span className="inline-block px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded">
+                        {question.category}
+                      </span>
+                    )}
+                  </div>
+
+                  {answer && (
+                    <div className="mb-4 bg-gray-50 rounded p-4">
+                      <p className="text-sm font-medium text-gray-600 mb-2">Your Answer:</p>
+                      <p className="text-gray-700 text-sm">{answer.text || 'No answer provided'}</p>
+                    </div>
+                  )}
+
+                  <div className="mb-4">
+                    <p className="text-sm font-medium text-gray-600 mb-2">AI Review:</p>
+                    <p className="text-gray-800">{review.answer_review}</p>
+                  </div>
+
+                  {review.suggestions && (
+                    <div className="bg-yellow-50 rounded p-4 border-l-2 border-yellow-400">
+                      <p className="text-sm font-medium text-yellow-800 mb-1">💡 Suggestions:</p>
+                      <p className="text-yellow-700 text-sm">{review.suggestions}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Actions */}
-      <div className="mt-8 flex gap-4 justify-center">
+      <div className="mt-8 flex gap-4 justify-center flex-wrap">
+        {session.can_retake !== false && (
+          <button
+            onClick={handleRetake}
+            disabled={isRetaking}
+            className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            <RefreshCw className={`h-5 w-5 ${isRetaking ? 'animate-spin' : ''}`} />
+            {isRetaking ? 'Starting...' : 'Try Again (Retake)'}
+          </button>
+        )}
         <button
           onClick={() => navigate('/interview')}
           className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"

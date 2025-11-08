@@ -94,6 +94,10 @@ export const profileService = {
     return api.generateCV(data, signal);
   },
 
+  async generateCVPreview(data: Record<string, unknown>, signal?: AbortSignal): Promise<any> {
+    return api.generateCVPreview(data, signal);
+  },
+
   async exportAllData(): Promise<Blob> {
     return api.exportProfile();
   },

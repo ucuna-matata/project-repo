@@ -23,6 +23,24 @@ pytest
 python manage.py makemigrations
 python manage.py migrate
 ```
+
+## Скрипти обслуговування
+
+### Тестування видалення CV
+```bash
+# Перевірка логіки видалення дублікатів
+python test_cv_deletion.py
+```
+
+### Очищення дублікатів CV
+```bash
+# Dry-run режим (показує що буде видалено, але не видаляє)
+python cleanup_duplicate_cvs.py
+
+# Виконання очищення (видаляє дублікати)
+python cleanup_duplicate_cvs.py --execute
+```
+
 ## Структура
 - `authz/` - Автентифікація (Google OAuth)
 - `profiles/` - Профілі + CV
@@ -30,4 +48,7 @@ python manage.py migrate
 - `trainer/` - Skills training
 - `files/` - File management
 - `config/` - Django налаштування
+
 Детальніше: [../DOCUMENTATION.md](../DOCUMENTATION.md)
+Виправлення дублікатів CV: [CV_DELETION_FIX.md](CV_DELETION_FIX.md)
+

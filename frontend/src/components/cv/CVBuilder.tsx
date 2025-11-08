@@ -6,12 +6,13 @@ import { cvFormSchema, type CVFormData } from '../../schemas/cvSchema';
 import CVPreview from './CVPreview';
 import CVExportButtons from './CVExportButtons';
 import { useProfile } from '../../hooks/useApi';
+import { useDebounce } from '../../hooks/useDebounce';
 
 interface CVBuilderProps {
   initialData?: Partial<CVFormData>;
   cvId?: string;
   onSave?: (data: CVFormData) => Promise<void>;
-  onGenerate?: (data: Partial<CVFormData>) => Promise<void>;
+  onGenerate?: (data: Partial<CVFormData>) => Promise<any>;
 }
 
 const defaultFormValues: CVFormData = {
@@ -36,6 +37,7 @@ export default function CVBuilder({ initialData, cvId, onSave, onGenerate }: CVB
   const [showPreview, setShowPreview] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isPreviewUpdating, setIsPreviewUpdating] = useState(false);
 
   // Fetch user profile to auto-populate name and email
   const { data: profile } = useProfile();
@@ -66,6 +68,7 @@ export default function CVBuilder({ initialData, cvId, onSave, onGenerate }: CVB
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
     reset,
   } = useForm<CVFormData>({
@@ -111,8 +114,30 @@ export default function CVBuilder({ initialData, cvId, onSave, onGenerate }: CVB
   // Watch all form data for real-time preview
   const formData = watch();
 
-  // Memoize preview data to prevent unnecessary re-renders
-  const previewData = useMemo(() => formData, [formData]);
+  // Track when preview is updating - shows visual feedback to user
+  // This triggers immediately on form change, before debounce
+  useEffect(() => {
+    setIsPreviewUpdating(true);
+    const timer = setTimeout(() => setIsPreviewUpdating(false), 150);
+    return () => clearTimeout(timer);
+  }, [formData]);
+
+  // Debounce form data for preview to improve performance during fast typing
+  // 150ms delay provides smooth updates without lag during rapid typing
+  const debouncedFormData = useDebounce(formData, 150);
+
+  // Memoize preview data with deep equality check to prevent unnecessary re-renders
+  // We explicitly list all nested properties to ensure proper memoization
+  const previewData = useMemo(() => ({
+    ...debouncedFormData,
+    // Ensure arrays are properly formatted
+    skills: Array.isArray(debouncedFormData.skills) ? debouncedFormData.skills : [],
+    experience: debouncedFormData.experience || [],
+    education: debouncedFormData.education || [],
+    projects: debouncedFormData.projects || [],
+    languages: debouncedFormData.languages || [],
+    certifications: debouncedFormData.certifications || [],
+  }), [debouncedFormData]);
 
   const onSubmit = async (data: CVFormData) => {
     setIsSaving(true);
@@ -128,9 +153,50 @@ export default function CVBuilder({ initialData, cvId, onSave, onGenerate }: CVB
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
-      await onGenerate?.(formData);
+      const generatedData = await onGenerate?.(formData);
+
+      if (generatedData) {
+        // Populate form fields with generated data
+        if (generatedData.personal) {
+          Object.keys(generatedData.personal).forEach((key) => {
+            setValue(`personal.${key}` as any, generatedData.personal[key]);
+          });
+        }
+
+        if (generatedData.summary) {
+          setValue('summary', generatedData.summary);
+        }
+
+        if (generatedData.experience) {
+          setValue('experience', generatedData.experience);
+        }
+
+        if (generatedData.education) {
+          setValue('education', generatedData.education);
+        }
+
+        if (generatedData.skills) {
+          setValue('skills', generatedData.skills);
+        }
+
+        if (generatedData.projects) {
+          setValue('projects', generatedData.projects);
+        }
+
+        if (generatedData.languages) {
+          setValue('languages', generatedData.languages);
+        }
+
+        if (generatedData.certifications) {
+          setValue('certifications', generatedData.certifications);
+        }
+
+        // Show success message
+        alert('CV content generated successfully! Review the fields and click Save to store your CV.');
+      }
     } catch (error) {
       console.error('Failed to generate CV:', error);
+      alert('Failed to generate CV content. Please try again.');
     } finally {
       setIsGenerating(false);
     }
@@ -138,17 +204,20 @@ export default function CVBuilder({ initialData, cvId, onSave, onGenerate }: CVB
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Mobile Preview Toggle Button */}
+      <button
+        type="button"
+        onClick={() => setShowPreview(!showPreview)}
+        className="lg:hidden fixed bottom-6 right-6 z-50 p-4 bg-[#226A74] text-white rounded-full shadow-lg hover:bg-[#1B575F] transition-all hover:scale-110"
+        aria-label={showPreview ? 'Show form' : 'Show preview'}
+      >
+        {showPreview ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
+      </button>
+
       {/* Form Section */}
-      <div className="bg-white p-6 rounded-lg shadow overflow-y-auto max-h-[calc(100vh-200px)]">
+      <div className={`bg-white p-6 rounded-lg shadow overflow-y-auto max-h-[calc(100vh-200px)] ${showPreview ? 'hidden lg:block' : 'block'}`}>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">CV Builder</h2>
-          <button
-            type="button"
-            onClick={() => setShowPreview(!showPreview)}
-            className="lg:hidden p-2 text-gray-600 hover:text-blue-600"
-          >
-            {showPreview ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-          </button>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -669,8 +738,14 @@ export default function CVBuilder({ initialData, cvId, onSave, onGenerate }: CVB
 
       {/* Preview Section */}
       <div className={`bg-white rounded-lg shadow ${showPreview ? 'block' : 'hidden lg:block'}`}>
-        <div className="p-4 border-b flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-gray-900">Live Preview</h2>
+        <div className="p-4 border-b flex justify-between items-center bg-gradient-to-r from-[#226A74] to-[#1B575F]">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-white">Live Preview</h2>
+            <span className="flex items-center gap-1 px-2 py-1 bg-white/20 text-white text-xs font-medium rounded-full">
+              <span className={`w-2 h-2 rounded-full ${isPreviewUpdating ? 'bg-yellow-400 animate-pulse' : 'bg-green-400 animate-pulse'}`}></span>
+              {isPreviewUpdating ? 'Updating...' : 'Live'}
+            </span>
+          </div>
           {cvId && (
             <div className="flex gap-2">
               <CVExportButtons cvId={cvId} cvTitle={previewData.title} />
