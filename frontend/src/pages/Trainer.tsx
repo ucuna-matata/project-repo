@@ -138,7 +138,7 @@ export default function Trainer() {
   if (loadingCategories) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-yellow-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#226A74]" />
       </div>
     );
   }
@@ -157,7 +157,7 @@ export default function Trainer() {
             onClick={() => setActiveTab('quiz')}
             className={`pb-4 px-2 font-medium text-sm border-b-2 transition-colors ${
               activeTab === 'quiz'
-                ? 'border-yellow-600 text-yellow-600'
+                ? 'border-[#226A74] text-[#226A74]'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -170,7 +170,7 @@ export default function Trainer() {
             onClick={() => setActiveTab('history')}
             className={`pb-4 px-2 font-medium text-sm border-b-2 transition-colors ${
               activeTab === 'history'
-                ? 'border-yellow-600 text-yellow-600'
+                ? 'border-[#226A74] text-[#226A74]'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -204,7 +204,7 @@ export default function Trainer() {
               <button
                 key={category}
                 onClick={() => handleCategorySelect(category)}
-                className="p-4 border-2 border-gray-200 rounded-lg hover:border-yellow-500 hover:bg-yellow-50 transition-all text-left"
+                className="p-4 border-2 border-gray-200 rounded-lg hover:border-[#226A74] hover:bg-[#226A74]/10 transition-all text-left"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -220,7 +220,7 @@ export default function Trainer() {
         </div>
       ) : !started ? (
         <div className="bg-white p-8 rounded-lg shadow max-w-2xl mx-auto text-center">
-          <Award className="h-16 w-16 text-yellow-600 mx-auto mb-4" />
+          <Award className="h-16 w-16 text-[#226A74] mx-auto mb-4" />
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">
             Ready to test your skills?
           </h2>
@@ -240,7 +240,7 @@ export default function Trainer() {
             <button
               onClick={handleStartQuiz}
               disabled={loadingQuestions}
-              className="px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 font-medium disabled:opacity-50"
+              className="px-6 py-3 bg-[#226A74] text-white rounded-lg hover:bg-[#226A74] font-medium disabled:opacity-50"
             >
               {loadingQuestions ? 'Loading...' : 'Start Quiz'}
             </button>
@@ -248,7 +248,7 @@ export default function Trainer() {
         </div>
       ) : loadingQuestions || questions.length === 0 ? (
         <div className="flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-yellow-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#226A74]" />
         </div>
       ) : (
         <div className="bg-white p-6 rounded-lg shadow max-w-3xl mx-auto">
@@ -258,7 +258,7 @@ export default function Trainer() {
             </span>
             <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
               <div
-                className="bg-yellow-600 h-2 rounded-full transition-all"
+                className="bg-[#226A74]-600 h-2 rounded-full transition-all"
                 style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
               />
             </div>
@@ -275,7 +275,7 @@ export default function Trainer() {
                 onClick={() => handleAnswer(idx)}
                 className={`w-full text-left p-4 rounded-lg border-2 transition-colors ${
                   answers[currentQuestion] === idx
-                    ? 'border-yellow-600 bg-yellow-50'
+                    ? 'border-[#226A74] bg-[#226A74]/10'
                     : 'border-gray-300 hover:border-gray-400'
                 }`}
               >
@@ -283,7 +283,7 @@ export default function Trainer() {
                   <div
                     className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center ${
                       answers[currentQuestion] === idx
-                        ? 'border-yellow-600 bg-yellow-600'
+                        ? 'border-[#226A74] bg-[#226A74]'
                         : 'border-gray-400'
                     }`}
                   >
@@ -309,7 +309,7 @@ export default function Trainer() {
               <button
                 onClick={handleNext}
                 disabled={answers[currentQuestion] === undefined}
-                className="px-4 py-2 bg-yellow-600 text-white rounded-md text-sm font-medium hover:bg-yellow-700 disabled:opacity-50"
+                className="px-4 py-2 bg-[#226A74] text-white rounded-md text-sm font-medium hover:bg-[#226A74] disabled:opacity-50"
               >
                 Next
               </button>
