@@ -132,9 +132,7 @@ The project follows a clean component-based architecture, with business logic se
 ## Authors
 
 **Team:** ucuna-matata
-Developed during **Hackathon CV 2025**.
-Open for further development and collaboration.
-
+ Nazar Mykhailyshchuk, Tanya Moroz, Daryna Nychyporuk
 ---
 
 ## License
