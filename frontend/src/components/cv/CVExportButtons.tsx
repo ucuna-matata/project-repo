@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FileText, File } from 'lucide-react';
-import { profileService } from '../../services/profile';
+import { profileService } from '../../services';
 
 interface CVExportButtonsProps {
   cvId: string;
@@ -26,7 +26,12 @@ export default function CVExportButtons({ cvId }: CVExportButtonsProps) {
         filename: filename
       });
 
-      // Create download link
+      // Verify we got data
+      if (blob.size === 0) {
+        throw new Error('Received empty file');
+      }
+
+      // Create a download link
       const url = window.URL.createObjectURL(blob);
       console.log(`[CVExport] Created blob URL: ${url}`);
 
@@ -34,9 +39,13 @@ export default function CVExportButtons({ cvId }: CVExportButtonsProps) {
       link.href = url;
       link.download = filename;
       link.style.display = 'none';
+
+      // Add to document
       document.body.appendChild(link);
 
-      console.log(`[CVExport] Triggering download...`);
+      console.log(`[CVExport] Triggering download for: ${filename}`);
+
+      // Trigger download
       link.click();
 
       // Cleanup after a short delay
@@ -50,7 +59,8 @@ export default function CVExportButtons({ cvId }: CVExportButtonsProps) {
 
     } catch (error) {
       console.error('[CVExport] ❌ Export failed:', error);
-      alert(`Failed to export CV as ${format.toUpperCase()}. Please try again.`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Failed to export CV as ${format.toUpperCase()}.\nError: ${errorMessage}\nPlease try again.`);
     } finally {
       setIsExporting(false);
       setExportFormat(null);

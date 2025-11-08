@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.http import FileResponse
+from django.http import HttpResponse
 
 from .models import Profile, CV
 from .serializers import ProfileSerializer, CVSerializer, CVCreateSerializer, CVUpdateSerializer
@@ -131,19 +131,50 @@ def cv_detail(request, cv_id):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def cv_export(request, cv_id):
-    """Export CV to PDF or DOCX format."""
-    cv = get_object_or_404(CV, id=cv_id, user=request.user)
+    """Export CV to PDF or DOCX format. Pure Django view without DRF."""
+    import logging
+    import json
+    logger = logging.getLogger(__name__)
+
+    # Check authentication manually (since we're not using DRF decorators)
+    if not request.user.is_authenticated:
+        return HttpResponse(
+            json.dumps({'error': 'Authentication required'}),
+            content_type='application/json',
+            status=401
+        )
+
+    # Only allow GET requests
+    if request.method != 'GET':
+        return HttpResponse(
+            json.dumps({'error': 'Method not allowed'}),
+            content_type='application/json',
+            status=405
+        )
+
+    logger.info(f"CV Export request - cv_id: {cv_id}, user: {request.user}")
+
+    # Check if CV exists and belongs to user
+    try:
+        cv = CV.objects.get(id=cv_id, user=request.user)
+        logger.info(f"CV found: {cv.title}")
+    except CV.DoesNotExist:
+        logger.error(f"CV not found or access denied: {cv_id}")
+        return HttpResponse(
+            json.dumps({'error': 'CV not found'}),
+            content_type='application/json',
+            status=404
+        )
 
     # Get format from query parameter (default to pdf)
     export_format = request.GET.get('format', 'pdf').lower()
 
     if export_format not in ['pdf', 'docx']:
-        return Response(
-            {'error': 'Invalid format. Use "pdf" or "docx".'},
-            status=status.HTTP_400_BAD_REQUEST
+        return HttpResponse(
+            json.dumps({'error': 'Invalid format. Use "pdf" or "docx".'}),
+            content_type='application/json',
+            status=400
         )
 
     try:
@@ -162,21 +193,21 @@ def cv_export(request, cv_id):
             payload={'cv_id': str(cv.id), 'format': export_format}
         )
 
+        logger.info(f"Export successful: {filename}")
+
         # Return file as response
-        response = FileResponse(
-            file_buffer,
-            content_type=content_type,
-            as_attachment=True,
-            filename=filename
-        )
-        # Explicitly set Content-Disposition header
+        file_data = file_buffer.getvalue()
+        response = HttpResponse(file_data, content_type=content_type)
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response['Content-Length'] = len(file_data)
         return response
 
     except Exception as e:
-        return Response(
-            {'error': f'Export failed: {str(e)}'},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        logger.exception(f"Export failed: {str(e)}")
+        return HttpResponse(
+            json.dumps({'error': f'Export failed: {str(e)}'}),
+            content_type='application/json',
+            status=500
         )
 
 

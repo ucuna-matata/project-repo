@@ -134,6 +134,11 @@ export async function exportCV(id: string, format: 'pdf' | 'docx') {
   const blob = await res.blob();
   console.log(`[API] exportCV: Blob received, size=${blob.size}, type=${blob.type}`);
 
+  // Ensure the blob has the correct type
+  const correctBlob = format === 'pdf'
+    ? new Blob([blob], { type: 'application/pdf' })
+    : new Blob([blob], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+
   const contentDisposition = res.headers.get('Content-Disposition');
   console.log(`[API] exportCV: Content-Disposition header: ${contentDisposition}`);
 
@@ -147,7 +152,7 @@ export async function exportCV(id: string, format: 'pdf' | 'docx') {
   }
 
   console.log(`[API] exportCV: Using filename: ${filename}`);
-  return { blob, filename };
+  return { blob: correctBlob, filename };
 }
 export async function generateCV(payload: Record<string, unknown>, signal?: AbortSignal) {
   const res = await fetch(`${API_ORIGIN}/api/cvs/generate/`, {
