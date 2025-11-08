@@ -3,13 +3,19 @@ from .models import Profile, CV
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    # Include user info from the User model
+    email = serializers.EmailField(source='user.email', read_only=True)
+    full_name = serializers.CharField(source='user.full_name', read_only=True)
+    avatar_url = serializers.URLField(source='user.avatar_url', read_only=True)
+
     class Meta:
         model = Profile
         fields = [
-            'id', 'links', 'education', 'experience', 'skills', 
+            'id', 'email', 'full_name', 'avatar_url',
+            'links', 'education', 'experience', 'skills',
             'projects', 'summary', 'preferences', 'updated_at'
         ]
-        read_only_fields = ['id', 'updated_at']
+        read_only_fields = ['id', 'email', 'full_name', 'avatar_url', 'updated_at']
 
 
 class CVSerializer(serializers.ModelSerializer):

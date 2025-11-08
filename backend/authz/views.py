@@ -87,10 +87,20 @@ def google_oauth_callback(request):
         user.last_login_at = timezone.now()
         user.save()
 
-        # Create profile if needed
-        if not hasattr(user, 'profile'):
-            from profiles.models import Profile
-            Profile.objects.create(user=user)
+        # Create or update profile with Google data
+        from profiles.models import Profile
+        profile, profile_created = Profile.objects.get_or_create(user=user)
+
+        # Auto-populate profile with Google data on first login
+        if profile_created:
+            # Add Google profile picture URL to links
+            if not profile.links:
+                profile.links = {}
+
+            if userinfo.get('picture'):
+                profile.links['avatar'] = userinfo.get('picture')
+
+            profile.save()
 
         # Log in user
         login(request, user, backend='django.contrib.auth.backends.ModelBackend')

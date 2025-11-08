@@ -1,8 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import { Download, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
+import { useState } from 'react';
+import CVExportButtons from '../components/cv/CVExportButtons';
 
 export default function CVMaster() {
   const { t } = useTranslation();
+  const [currentCVId] = useState<string | null>(null);
 
   return (
     <div className="px-4 py-6">
@@ -68,15 +71,29 @@ export default function CVMaster() {
         <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-gray-900">Preview</h2>
-            <button className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-              <Download className="h-4 w-4 mr-2" />
-              {t('cv.export')}
-            </button>
+            {currentCVId && (
+              <CVExportButtons cvId={currentCVId} cvTitle="My CV" />
+            )}
           </div>
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-500">
             <p>CV Preview</p>
             <p className="text-sm mt-2">Fill in the form to see your CV preview</p>
+            {!currentCVId && (
+              <p className="text-xs mt-4 text-gray-400">Save your CV to enable export options</p>
+            )}
           </div>
+
+          {currentCVId && (
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+              <p className="text-sm text-blue-900 mb-2 font-medium">Export your CV:</p>
+              <p className="text-xs text-blue-700 mb-3">
+                Download your CV in PDF format for easy sharing, or DOCX format for further editing.
+              </p>
+              <div className="flex gap-2">
+                <CVExportButtons cvId={currentCVId} cvTitle="My CV" />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

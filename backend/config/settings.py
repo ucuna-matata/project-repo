@@ -200,7 +200,7 @@ CSRF_TRUSTED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:5173'
 # Google OAuth
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '')
 GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET', '')
-WEB_ORIGIN = os.getenv('WEB_ORIGIN', 'http://localhost:5173')
+WEB_ORIGIN = os.getenv('WEB_ORIGIN', 'http://localhost:5173')  # Updated to current frontend port
 
 # LLM Settings
 LLM_PROVIDER_URL = os.getenv('LLM_PROVIDER_URL', 'https://api.openai.com/v1')

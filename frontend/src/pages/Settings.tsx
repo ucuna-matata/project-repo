@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Download, Trash2, Globe, Shield, Bell, User, Sparkles } from 'lucide-react';
+import { Download, Trash2, Globe, Shield, Bell, User } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import * as api from '../services/api';
 
@@ -17,12 +17,25 @@ export default function Settings() {
   const exportMutation = useMutation({
     mutationFn: api.exportProfile,
     onSuccess: (data: any) => {
-      if (data.url) {
-        window.open(data.url, '_blank');
-      }
+      // Create a Blob from the JSON data
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+
+      // Create a temporary link and trigger download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `my-data-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      alert('✓ Data exported successfully!');
     },
     onError: () => {
-      alert('Failed to export data. Please try again.');
+      alert('✗ Failed to export data. Please try again.');
     },
   });
 
@@ -42,8 +55,24 @@ export default function Settings() {
   };
 
   const handleErase = () => {
-    if (confirm('Are you sure you want to erase all your data? This action cannot be undone.')) {
-      eraseMutation.mutate();
+    const confirmed = window.confirm(
+      '⚠️ Are you absolutely sure you want to erase all your data?\n\n' +
+      'This will permanently delete:\n' +
+      '• Your profile and CV data\n' +
+      '• All interview sessions\n' +
+      '• All training results\n' +
+      '• Your account\n\n' +
+      'This action CANNOT be undone!\n\n' +
+      'Type "DELETE" in the next prompt to confirm.'
+    );
+
+    if (confirmed) {
+      const confirmation = window.prompt('Type "DELETE" to confirm permanent deletion:');
+      if (confirmation === 'DELETE') {
+        eraseMutation.mutate();
+      } else {
+        alert('Deletion cancelled. Text did not match.');
+      }
     }
   };
 

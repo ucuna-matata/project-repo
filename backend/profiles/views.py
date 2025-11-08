@@ -4,9 +4,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.http import FileResponse
 
 from .models import Profile, CV
 from .serializers import ProfileSerializer, CVSerializer, CVCreateSerializer, CVUpdateSerializer
+from .services.cv_export_service import CVExportService
 from authz.models import AuditEvent, DeletionRequest
 from authz.serializers import UserSerializer
 from interview.models import InterviewSession
@@ -129,6 +131,53 @@ def cv_detail(request, cv_id):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def cv_export(request, cv_id):
+    """Export CV to PDF or DOCX format."""
+    cv = get_object_or_404(CV, id=cv_id, user=request.user)
+
+    # Get format from query parameter (default to pdf)
+    export_format = request.GET.get('format', 'pdf').lower()
+
+    if export_format not in ['pdf', 'docx']:
+        return Response(
+            {'error': 'Invalid format. Use "pdf" or "docx".'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        # Export CV using the service
+        if export_format == 'pdf':
+            file_buffer, filename = CVExportService.export_to_pdf(cv)
+            content_type = 'application/pdf'
+        else:  # docx
+            file_buffer, filename = CVExportService.export_to_docx(cv)
+            content_type = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+
+        # Create audit event
+        AuditEvent.objects.create(
+            user=request.user,
+            type='cv_export',
+            payload={'cv_id': str(cv.id), 'format': export_format}
+        )
+
+        # Return file as response
+        response = FileResponse(
+            file_buffer,
+            content_type=content_type,
+            as_attachment=True,
+            filename=filename
+        )
+        return response
+
+    except Exception as e:
+        return Response(
+            {'error': f'Export failed: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def export_data(request):
@@ -208,70 +257,6 @@ def erase_data(request):
         deletion_request.save()
         return Response(
             {'status': 'failed', 'error': str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def cv_export(request, cv_id):
-    """Export CV to PDF or DOCX format."""
-    from .services.export_service import CVExportService
-    from .services.storage_service import StorageService
-    from datetime import datetime, timedelta
-    
-    # Get CV and verify ownership
-    cv = get_object_or_404(CV, id=cv_id, user=request.user)
-    
-    # Get format from query params or request data (support both)
-    export_format = request.query_params.get('format') or request.data.get('format', 'pdf')
-    export_format = export_format.lower()
-    
-    if export_format not in ['pdf', 'docx']:
-        return Response(
-            {'error': 'Invalid format. Use "pdf" or "docx".'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-    
-    try:
-        # Generate file
-        if export_format == 'pdf':
-            file_bytes, filename = CVExportService.generate_pdf(cv)
-        else:
-            file_bytes, filename = CVExportService.generate_docx(cv)
-        
-        # Save to storage
-        storage = StorageService()
-        file_path, download_url = storage.save_file(file_bytes, filename)
-        
-        # Calculate expiry time (1 hour from now)
-        expires_at = timezone.now() + timedelta(hours=1)
-        
-        # Create audit event
-        AuditEvent.objects.create(
-            user=request.user,
-            type='cv_export',
-            payload={
-                'cv_id': str(cv.id),
-                'format': export_format,
-                'filename': filename
-            }
-        )
-        
-        return Response({
-            'download_url': download_url,
-            'expires_at': expires_at.isoformat(),
-            'format': export_format,
-            'filename': filename
-        })
-        
-    except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.error(f"Error exporting CV {cv_id}: {e}", exc_info=True)
-        
-        return Response(
-            {'error': f'Export failed: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 

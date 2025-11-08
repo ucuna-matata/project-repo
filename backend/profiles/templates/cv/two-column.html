@@ -1,206 +1,312 @@
-{% extends "cv/base.html" %}
-
-{% block extra_styles %}
-<style>
-    .two-column-layout {
-        display: grid;
-        grid-template-columns: 250px 1fr;
-        gap: 30px;
-    }
-    
-    .sidebar {
-        background: #f8f9fa;
-        padding: 20px;
-        border-radius: 8px;
-    }
-    
-    .sidebar h2 {
-        font-size: 14pt;
-        margin-top: 16px;
-        border-bottom: 1px solid #ddd;
-    }
-    
-    .sidebar .section {
-        margin-bottom: 20px;
-    }
-    
-    .main-content {
-        padding-left: 10px;
-    }
-    
-    .contact-item {
-        margin-bottom: 8px;
-        font-size: 10pt;
-        word-break: break-word;
-    }
-    
-    .skill-list {
-        list-style: none;
-        padding: 0;
-    }
-    
-    .skill-list li {
-        padding: 4px 0;
-        font-size: 10pt;
-    }
-    
-    @media print {
-        .two-column-layout {
-            display: grid;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ cv.title }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1cm;
         }
-    }
-</style>
-{% endblock %}
 
-{% block content %}
-<div class="two-column-layout">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <!-- Contact -->
-        <section class="section">
-            <h2>Contact</h2>
-            {% if personal.email %}
-            <div class="contact-item">
-                <strong>Email:</strong><br>
-                {{ personal.email }}
-            </div>
-            {% endif %}
-            {% if personal.phone %}
-            <div class="contact-item">
-                <strong>Phone:</strong><br>
-                {{ personal.phone }}
-            </div>
-            {% endif %}
-            {% if personal.location %}
-            <div class="contact-item">
-                <strong>Location:</strong><br>
-                {{ personal.location }}
-            </div>
-            {% endif %}
-        </section>
-        
-        <!-- Links -->
-        {% if links %}
-        <section class="section">
-            <h2>Links</h2>
-            {% if links.linkedin %}
-            <div class="contact-item">
-                <a href="{{ links.linkedin }}">LinkedIn</a>
-            </div>
-            {% endif %}
-            {% if links.github %}
-            <div class="contact-item">
-                <a href="{{ links.github }}">GitHub</a>
-            </div>
-            {% endif %}
-            {% if links.portfolio %}
-            <div class="contact-item">
-                <a href="{{ links.portfolio }}">Portfolio</a>
-            </div>
-            {% endif %}
-        </section>
-        {% endif %}
-        
-        <!-- Skills -->
-        {% if skills %}
-        <section class="section">
-            <h2>Skills</h2>
-            <ul class="skill-list">
-                {% for skill in skills %}
-                <li>• {{ skill }}</li>
-                {% endfor %}
-            </ul>
-        </section>
-        {% endif %}
-    </aside>
-    
-    <!-- Main Content -->
-    <main class="main-content">
-        <header>
-            <h1>{{ personal.name|default:"Your Name" }}</h1>
-        </header>
-        
-        <!-- Summary -->
-        {% if summary %}
-        <section class="section">
-            <div class="summary">{{ summary }}</div>
-        </section>
-        {% endif %}
-        
-        <!-- Experience -->
-        {% if experience %}
-        <section class="section">
-            <h2>Experience</h2>
-            {% for exp in experience %}
-            <div class="experience-item">
-                <div class="item-header">
-                    <h3 class="item-title">{{ exp.position|default:"Position" }}</h3>
-                    <span class="item-date">
-                        {% if exp.start_date %}{{ exp.start_date }}{% endif %}
-                        {% if exp.end_date %} - {{ exp.end_date }}{% else %} - Present{% endif %}
-                    </span>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            gap: 1cm;
+        }
+
+        .sidebar {
+            width: 6cm;
+            background-color: #2c3e50;
+            color: white;
+            padding: 1cm 0.8cm;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 1cm 0.8cm;
+        }
+
+        h1 {
+            font-size: 24pt;
+            font-weight: bold;
+            margin-bottom: 0.3em;
+            color: #2c3e50;
+        }
+
+        h2 {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+            padding-bottom: 0.2em;
+            border-bottom: 2px solid #3498db;
+            color: #2c3e50;
+        }
+
+        .sidebar h2 {
+            color: #ecf0f1;
+            border-bottom-color: #ecf0f1;
+        }
+
+        h3 {
+            font-size: 12pt;
+            font-weight: bold;
+            margin-top: 0.6em;
+            margin-bottom: 0.2em;
+            color: #34495e;
+        }
+
+        .header {
+            margin-bottom: 1em;
+        }
+
+        .contact-info {
+            font-size: 9pt;
+            color: #ecf0f1;
+            margin-bottom: 0.8em;
+        }
+
+        .contact-info div {
+            margin-bottom: 0.3em;
+        }
+
+        .contact-icon {
+            display: inline-block;
+            width: 1em;
+            margin-right: 0.3em;
+        }
+
+        .section {
+            margin-bottom: 1.2em;
+        }
+
+        .sidebar .section {
+            color: #ecf0f1;
+        }
+
+        .entry {
+            margin-bottom: 0.8em;
+        }
+
+        .entry-header {
+            margin-bottom: 0.2em;
+        }
+
+        .entry-title {
+            font-weight: bold;
+            font-size: 11pt;
+        }
+
+        .entry-subtitle {
+            font-style: italic;
+            color: #555;
+            margin-bottom: 0.2em;
+            font-size: 10pt;
+        }
+
+        .sidebar .entry-subtitle {
+            color: #bdc3c7;
+        }
+
+        .entry-date {
+            font-size: 9pt;
+            color: #777;
+            margin-bottom: 0.2em;
+        }
+
+        .sidebar .entry-date {
+            color: #bdc3c7;
+        }
+
+        .entry-description {
+            margin-top: 0.3em;
+            font-size: 10pt;
+            text-align: justify;
+        }
+
+        .skill-item {
+            margin-bottom: 0.5em;
+        }
+
+        .skill-name {
+            font-weight: bold;
+            margin-bottom: 0.2em;
+        }
+
+        .skill-level {
+            font-size: 9pt;
+            color: #bdc3c7;
+        }
+
+        .link-item {
+            margin-bottom: 0.4em;
+            font-size: 9pt;
+            word-break: break-all;
+        }
+
+        .link-item a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .sidebar .link-item a {
+            color: #5dade2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Contact Info -->
+            <div class="section">
+                <h2>Contact</h2>
+                <div class="contact-info">
+                    {% if sections.personal.email %}
+                        <div>
+                            <span class="contact-icon">✉</span>
+                            {{ sections.personal.email }}
+                        </div>
+                    {% endif %}
+                    {% if sections.personal.phone %}
+                        <div>
+                            <span class="contact-icon">☎</span>
+                            {{ sections.personal.phone }}
+                        </div>
+                    {% endif %}
+                    {% if sections.personal.location %}
+                        <div>
+                            <span class="contact-icon">📍</span>
+                            {{ sections.personal.location }}
+                        </div>
+                    {% endif %}
                 </div>
-                <div class="item-subtitle">{{ exp.company|default:"Company" }}</div>
-                {% if exp.description %}
-                <div class="item-description">{{ exp.description }}</div>
-                {% endif %}
-                {% if exp.achievements %}
-                <ul class="achievements">
-                    {% for achievement in exp.achievements %}
-                    <li>{{ achievement }}</li>
+            </div>
+
+            <!-- Links -->
+            {% if sections.personal.links %}
+                <div class="section">
+                    <h2>Links</h2>
+                    {% if sections.personal.links.linkedin %}
+                        <div class="link-item">
+                            <a href="{{ sections.personal.links.linkedin }}">LinkedIn</a>
+                        </div>
+                    {% endif %}
+                    {% if sections.personal.links.github %}
+                        <div class="link-item">
+                            <a href="{{ sections.personal.links.github }}">GitHub</a>
+                        </div>
+                    {% endif %}
+                    {% if sections.personal.links.portfolio %}
+                        <div class="link-item">
+                            <a href="{{ sections.personal.links.portfolio }}">Portfolio</a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <!-- Skills -->
+            {% if sections.skills %}
+                <div class="section">
+                    <h2>Skills</h2>
+                    {% regroup sections.skills by category as skills_by_category %}
+                    {% for category in skills_by_category %}
+                        <div class="skill-item">
+                            <div class="skill-name">{{ category.grouper|default:"General" }}</div>
+                            <div>
+                                {% for skill in category.list %}{{ skill.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                            </div>
+                        </div>
                     {% endfor %}
-                </ul>
-                {% endif %}
-            </div>
-            {% endfor %}
-        </section>
-        {% endif %}
-        
-        <!-- Education -->
-        {% if education %}
-        <section class="section">
-            <h2>Education</h2>
-            {% for edu in education %}
-            <div class="education-item">
-                <div class="item-header">
-                    <h3 class="item-title">{{ edu.degree|default:"Degree" }}</h3>
-                    <span class="item-date">
-                        {% if edu.start_date %}{{ edu.start_date }}{% endif %}
-                        {% if edu.end_date %} - {{ edu.end_date }}{% endif %}
-                    </span>
                 </div>
-                <div class="item-subtitle">{{ edu.institution|default:"Institution" }}</div>
-                {% if edu.description %}
-                <div class="item-description">{{ edu.description }}</div>
-                {% endif %}
-            </div>
-            {% endfor %}
-        </section>
-        {% endif %}
-        
-        <!-- Projects -->
-        {% if projects %}
-        <section class="section">
-            <h2>Projects</h2>
-            {% for project in projects %}
-            <div class="project-item">
-                <h3 class="item-title">{{ project.name|default:"Project Name" }}</h3>
-                {% if project.description %}
-                <div class="item-description">{{ project.description }}</div>
-                {% endif %}
-                {% if project.url %}
-                <div class="links">
-                    <a href="{{ project.url }}">View Project</a>
-                </div>
-                {% endif %}
-            </div>
-            {% endfor %}
-        </section>
-        {% endif %}
-    </main>
-</div>
+            {% endif %}
 
-<div class="footer">
-    Generated on {% now "Y-m-d" %}
-</div>
-{% endblock %}
+            <!-- Education (in sidebar for two-column) -->
+            {% if sections.education %}
+                <div class="section">
+                    <h2>Education</h2>
+                    {% for edu in sections.education %}
+                        <div class="entry">
+                            <div class="entry-title">{{ edu.degree }}</div>
+                            <div class="entry-subtitle">{{ edu.institution }}</div>
+                            <div class="entry-date">{{ edu.year }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                {% if sections.personal.name %}
+                    <h1>{{ sections.personal.name }}</h1>
+                {% endif %}
+            </div>
+
+            <!-- Summary -->
+            {% if sections.summary %}
+                <div class="section">
+                    <h2>Profile</h2>
+                    <p>{{ sections.summary }}</p>
+                </div>
+            {% endif %}
+
+            <!-- Experience -->
+            {% if sections.experience %}
+                <div class="section">
+                    <h2>Work Experience</h2>
+                    {% for exp in sections.experience %}
+                        <div class="entry">
+                            <div class="entry-header">
+                                <h3 class="entry-title">{{ exp.title }}</h3>
+                                <div class="entry-subtitle">{{ exp.company }}</div>
+                                <div class="entry-date">
+                                    {{ exp.start }}{% if exp.end %} - {{ exp.end }}{% else %} - Present{% endif %}
+                                </div>
+                            </div>
+                            {% if exp.description %}
+                                <div class="entry-description">{{ exp.description }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Projects -->
+            {% if sections.projects %}
+                <div class="section">
+                    <h2>Projects</h2>
+                    {% for project in sections.projects %}
+                        <div class="entry">
+                            <h3 class="entry-title">{{ project.title }}</h3>
+                            {% if project.description %}
+                                <div class="entry-description">{{ project.description }}</div>
+                            {% endif %}
+                            {% if project.tech %}
+                                <div class="entry-date" style="margin-top: 0.2em;">Technologies: {{ project.tech }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
+
