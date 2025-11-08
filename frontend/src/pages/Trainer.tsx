@@ -1,40 +1,36 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Award, ChevronRight } from 'lucide-react';
+import { Award, ChevronRight, Loader2 } from 'lucide-react';
+import { useTrainerCategories, useTrainerQuestions, useSubmitTrainerAttempt } from '../hooks/useApi';
 
 export default function Trainer() {
   const { t } = useTranslation();
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [started, setStarted] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
+  const [startTime, setStartTime] = useState<number>(0);
 
-  const mockQuiz = [
-    {
-      question: 'What does HTML stand for?',
-      options: [
-        'Hyper Text Markup Language',
-        'High Tech Modern Language',
-        'Home Tool Markup Language',
-        'Hyperlinks Text Mark Language',
-      ],
-      correct: 0,
-    },
-    {
-      question: 'Which language is primarily used for styling web pages?',
-      options: ['JavaScript', 'Python', 'CSS', 'Java'],
-      correct: 2,
-    },
-    {
-      question: 'What is React?',
-      options: [
-        'A programming language',
-        'A JavaScript library for building UIs',
-        'A database',
-        'A web server',
-      ],
-      correct: 1,
-    },
-  ];
+  const { data: categoriesData, isLoading: loadingCategories } = useTrainerCategories();
+  const { data: questionsData, isLoading: loadingQuestions, refetch: refetchQuestions } =
+    useTrainerQuestions(selectedCategory, 10);
+  const submitAttempt = useSubmitTrainerAttempt();
+
+  const categories = categoriesData?.categories || [];
+  const questions = questionsData?.questions || [];
+
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+    setAnswers([]);
+    setCurrentQuestion(0);
+    setStarted(false);
+  };
+
+  const handleStartQuiz = () => {
+    setStarted(true);
+    setStartTime(Date.now());
+    refetchQuestions();
+  };
 
   const handleAnswer = (answerIndex: number) => {
     const newAnswers = [...answers];
@@ -43,17 +39,50 @@ export default function Trainer() {
   };
 
   const handleNext = () => {
-    if (currentQuestion < mockQuiz.length - 1) {
+    if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     }
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
+    const timeTaken = Math.floor((Date.now() - startTime) / 1000);
     const score = answers.reduce((acc, answer, idx) => {
-      return acc + (answer === mockQuiz[idx].correct ? 1 : 0);
+      return acc + (answer === questions[idx]?.correct ? 1 : 0);
     }, 0);
-    alert(`Your score: ${score}/${mockQuiz.length}`);
+
+    try {
+      await submitAttempt.mutateAsync({
+        module_key: selectedCategory,
+        score,
+        max_score: questions.length,
+        metadata: {
+          questions,
+          answers: answers.map((a, idx) => ({
+            question_id: questions[idx]?.id,
+            selected: a,
+            correct: questions[idx]?.correct,
+          })),
+          time_taken: timeTaken,
+        },
+      });
+
+      alert(`Your score: ${score}/${questions.length}`);
+      setStarted(false);
+      setAnswers([]);
+      setCurrentQuestion(0);
+    } catch (error) {
+      console.error('Failed to submit results:', error);
+      alert('Failed to submit results. Please try again.');
+    }
   };
+
+  if (loadingCategories) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-yellow-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="px-4 py-6">
@@ -62,42 +91,82 @@ export default function Trainer() {
         <p className="mt-2 text-gray-600">Test your knowledge and skills</p>
       </div>
 
-      {!started ? (
+      {!selectedCategory ? (
+        <div className="bg-white p-8 rounded-lg shadow max-w-2xl mx-auto">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">
+            Select a Category
+          </h2>
+          <div className="grid gap-4">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => handleCategorySelect(category)}
+                className="p-4 border-2 border-gray-200 rounded-lg hover:border-yellow-500 hover:bg-yellow-50 transition-all text-left"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold text-gray-900 capitalize">
+                      {category.replace('-', ' ')}
+                    </h3>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-gray-400" />
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : !started ? (
         <div className="bg-white p-8 rounded-lg shadow max-w-2xl mx-auto text-center">
           <Award className="h-16 w-16 text-yellow-600 mx-auto mb-4" />
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">
             Ready to test your skills?
           </h2>
-          <p className="text-gray-600 mb-6">
-            This quiz contains {mockQuiz.length} questions covering web development basics.
+          <p className="text-gray-600 mb-2">
+            Category: <span className="font-semibold capitalize">{selectedCategory.replace('-', ' ')}</span>
           </p>
-          <button
-            onClick={() => setStarted(true)}
-            className="px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 font-medium"
-          >
-            Start Quiz
-          </button>
+          <p className="text-gray-600 mb-6">
+            This quiz contains 10 questions.
+          </p>
+          <div className="flex gap-4 justify-center">
+            <button
+              onClick={() => setSelectedCategory('')}
+              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
+            >
+              Change Category
+            </button>
+            <button
+              onClick={handleStartQuiz}
+              disabled={loadingQuestions}
+              className="px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 font-medium disabled:opacity-50"
+            >
+              {loadingQuestions ? 'Loading...' : 'Start Quiz'}
+            </button>
+          </div>
+        </div>
+      ) : loadingQuestions || questions.length === 0 ? (
+        <div className="flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-yellow-600" />
         </div>
       ) : (
         <div className="bg-white p-6 rounded-lg shadow max-w-3xl mx-auto">
           <div className="mb-6">
             <span className="text-sm text-gray-600">
-              Question {currentQuestion + 1} of {mockQuiz.length}
+              Question {currentQuestion + 1} of {questions.length}
             </span>
             <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
               <div
                 className="bg-yellow-600 h-2 rounded-full transition-all"
-                style={{ width: `${((currentQuestion + 1) / mockQuiz.length) * 100}%` }}
+                style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
               />
             </div>
           </div>
 
           <h3 className="text-xl font-semibold text-gray-900 mb-6">
-            {mockQuiz[currentQuestion].question}
+            {questions[currentQuestion]?.text}
           </h3>
 
           <div className="space-y-3 mb-8">
-            {mockQuiz[currentQuestion].options.map((option, idx) => (
+            {questions[currentQuestion]?.options.map((option, idx) => (
               <button
                 key={idx}
                 onClick={() => handleAnswer(idx)}
@@ -133,22 +202,21 @@ export default function Trainer() {
             >
               Previous
             </button>
-            {currentQuestion < mockQuiz.length - 1 ? (
+            {currentQuestion < questions.length - 1 ? (
               <button
                 onClick={handleNext}
                 disabled={answers[currentQuestion] === undefined}
-                className="inline-flex items-center px-4 py-2 bg-yellow-600 text-white rounded-md text-sm font-medium hover:bg-yellow-700 disabled:opacity-50"
+                className="px-4 py-2 bg-yellow-600 text-white rounded-md text-sm font-medium hover:bg-yellow-700 disabled:opacity-50"
               >
                 Next
-                <ChevronRight className="h-4 w-4 ml-2" />
               </button>
             ) : (
               <button
                 onClick={handleFinish}
-                disabled={answers[currentQuestion] === undefined}
+                disabled={answers[currentQuestion] === undefined || submitAttempt.isPending}
                 className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 disabled:opacity-50"
               >
-                Finish Quiz
+                {submitAttempt.isPending ? 'Submitting...' : 'Finish'}
               </button>
             )}
           </div>
@@ -157,4 +225,3 @@ export default function Trainer() {
     </div>
   );
 }
-
