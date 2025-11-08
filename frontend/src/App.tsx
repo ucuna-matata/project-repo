@@ -54,8 +54,9 @@ export default function App() {
             <Route element={<Layout />}>
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
-              <Route path="cv" element={<CVMaster />} />
+              <Route path="cv" element={<CVList />} />
               <Route path="cv-list" element={<CVList />} />
+              <Route path="cv-master" element={<CVMaster />} />
               <Route path="interview" element={<Interview />} />
               <Route path="trainer" element={<Trainer />} />
               <Route path="settings" element={<Settings />} />

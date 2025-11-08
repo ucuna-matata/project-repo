@@ -12,26 +12,44 @@ export default function CVExportButtons({ cvId }: CVExportButtonsProps) {
   const [exportFormat, setExportFormat] = useState<'pdf' | 'docx' | null>(null);
 
   const handleExport = async (format: 'pdf' | 'docx') => {
+    console.log(`[CVExport] Starting export: format=${format}, cvId=${cvId}`);
     setIsExporting(true);
     setExportFormat(format);
 
     try {
+      console.log(`[CVExport] Calling exportCV service...`);
       const { blob, filename } = await profileService.exportCV(cvId, format);
+
+      console.log(`[CVExport] Received blob:`, {
+        size: blob.size,
+        type: blob.type,
+        filename: filename
+      });
 
       // Create download link
       const url = window.URL.createObjectURL(blob);
+      console.log(`[CVExport] Created blob URL: ${url}`);
+
       const link = document.createElement('a');
       link.href = url;
       link.download = filename;
+      link.style.display = 'none';
       document.body.appendChild(link);
+
+      console.log(`[CVExport] Triggering download...`);
       link.click();
 
-      // Cleanup
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      // Cleanup after a short delay
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        console.log(`[CVExport] Cleanup completed`);
+      }, 100);
+
+      console.log(`[CVExport] ✅ Export successful!`);
 
     } catch (error) {
-      console.error('Export failed:', error);
+      console.error('[CVExport] ❌ Export failed:', error);
       alert(`Failed to export CV as ${format.toUpperCase()}. Please try again.`);
     } finally {
       setIsExporting(false);

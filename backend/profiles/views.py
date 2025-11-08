@@ -169,6 +169,8 @@ def cv_export(request, cv_id):
             as_attachment=True,
             filename=filename
         )
+        # Explicitly set Content-Disposition header
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response
 
     except Exception as e:

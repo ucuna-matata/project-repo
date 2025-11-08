@@ -108,7 +108,7 @@ class CVExportService:
             for exp in experience:
                 # Job title and company
                 title_para = document.add_paragraph()
-                title_run = title_para.add_run(exp.get('title', 'Position'))
+                title_run = title_para.add_run(exp.get('position') or exp.get('title', 'Position'))
                 title_run.bold = True
                 title_run.font.size = Pt(12)
 
@@ -118,11 +118,13 @@ class CVExportService:
 
                 # Dates
                 date_parts = []
-                if exp.get('start'):
-                    date_parts.append(exp['start'])
-                if exp.get('end'):
-                    date_parts.append(exp['end'])
-                elif exp.get('start'):
+                start = exp.get('start_date') or exp.get('start')
+                end = exp.get('end_date') or exp.get('end')
+                if start:
+                    date_parts.append(start)
+                if end:
+                    date_parts.append(end)
+                elif start:
                     date_parts.append('Present')
 
                 if date_parts:
@@ -152,8 +154,11 @@ class CVExportService:
                     inst_run = inst_para.add_run(edu['institution'])
                     inst_run.italic = True
 
-                # Year
-                if edu.get('year'):
+                # Year/Dates
+                if edu.get('start_date') and edu.get('end_date'):
+                    year_para = document.add_paragraph(f"{edu['start_date']} - {edu['end_date']}")
+                    year_para.runs[0].font.color.rgb = RGBColor(100, 100, 100)
+                elif edu.get('year'):
                     year_para = document.add_paragraph(edu['year'])
                     year_para.runs[0].font.color.rgb = RGBColor(100, 100, 100)
 
@@ -168,19 +173,24 @@ class CVExportService:
         if skills:
             document.add_heading('Skills', level=2)
 
-            # Group skills by category
-            skills_by_category = {}
-            for skill in skills:
-                category = skill.get('category', 'General')
-                if category not in skills_by_category:
-                    skills_by_category[category] = []
-                skills_by_category[category].append(skill.get('name', ''))
+            # Handle both formats: array of strings or array of objects
+            if skills and isinstance(skills[0], str):
+                # Simple list of skills as strings
+                skills_para = document.add_paragraph(', '.join(skills))
+            else:
+                # Group skills by category
+                skills_by_category = {}
+                for skill in skills:
+                    category = skill.get('category', 'General')
+                    if category not in skills_by_category:
+                        skills_by_category[category] = []
+                    skills_by_category[category].append(skill.get('name', ''))
 
-            for category, skill_names in skills_by_category.items():
-                cat_para = document.add_paragraph()
-                cat_run = cat_para.add_run(f"{category}: ")
-                cat_run.bold = True
-                cat_para.add_run(', '.join(skill_names))
+                for category, skill_names in skills_by_category.items():
+                    cat_para = document.add_paragraph()
+                    cat_run = cat_para.add_run(f"{category}: ")
+                    cat_run.bold = True
+                    cat_para.add_run(', '.join(skill_names))
 
             document.add_paragraph()  # Spacing
 
@@ -191,7 +201,7 @@ class CVExportService:
             for project in projects:
                 # Project title
                 title_para = document.add_paragraph()
-                title_run = title_para.add_run(project.get('title', 'Project'))
+                title_run = title_para.add_run(project.get('name') or project.get('title', 'Project'))
                 title_run.bold = True
                 title_run.font.size = Pt(12)
 
@@ -200,13 +210,24 @@ class CVExportService:
                     document.add_paragraph(project['description'])
 
                 # Technologies
-                if project.get('tech'):
+                if project.get('technologies'):
+                    tech_para = document.add_paragraph()
+                    tech_para.add_run('Technologies: ').italic = True
+                    if isinstance(project['technologies'], list):
+                        tech_para.add_run(', '.join(project['technologies']))
+                    else:
+                        tech_para.add_run(project['technologies'])
+                elif project.get('tech'):
                     tech_para = document.add_paragraph()
                     tech_para.add_run('Technologies: ').italic = True
                     tech_para.add_run(project['tech'])
 
                 # Link
-                if project.get('link'):
+                if project.get('url'):
+                    link_para = document.add_paragraph()
+                    link_para.add_run('Link: ').italic = True
+                    link_para.add_run(project['url'])
+                elif project.get('link'):
                     link_para = document.add_paragraph()
                     link_para.add_run('Link: ').italic = True
                     link_para.add_run(project['link'])
@@ -226,9 +247,19 @@ class CVExportService:
     @staticmethod
     def _render_cv_html(cv: Any) -> str:
         """Render CV as HTML using template."""
+        # Normalize sections data
+        sections = cv.sections or {}
+
+        # Normalize skills format - convert array of strings to array of objects if needed
+        if 'skills' in sections and sections['skills']:
+            skills = sections['skills']
+            if skills and isinstance(skills[0], str):
+                # Convert array of strings to array of objects
+                sections['skills'] = [{'name': skill, 'category': 'General'} for skill in skills]
+
         context = {
             'cv': cv,
-            'sections': cv.sections or {},
+            'sections': sections,
             'template_key': cv.template_key,
         }
 

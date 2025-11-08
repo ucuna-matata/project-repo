@@ -1,9 +1,36 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { FileText, MessageSquare, Trophy, Download, Trash2, Sparkles, ArrowRight, TrendingUp } from 'lucide-react';
+import { FileText, MessageSquare, Trophy, Download, Trash2, Sparkles, ArrowRight, TrendingUp, Plus, Eye, Edit } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { profileService, type CV } from '../services';
 
 export default function Dashboard() {
   const { t } = useTranslation();
+  const [cvs, setCvs] = useState<CV[]>([]);
+  const [cvsLoading, setCvsLoading] = useState(true);
+
+  useEffect(() => {
+    loadCVs();
+  }, []);
+
+  const loadCVs = async () => {
+    try {
+      setCvsLoading(true);
+      const data = await profileService.listCVs();
+      setCvs(data.slice(0, 3)); // Show only first 3
+    } catch (err) {
+      console.error('Failed to load CVs:', err);
+    } finally {
+      setCvsLoading(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    });
+  };
 
   const features = [
     {
@@ -88,6 +115,78 @@ export default function Dashboard() {
             </Link>
           ))}
         </div>
+      </div>
+
+      {/* Recent CVs */}
+      <div className="glass-effect p-8 rounded-2xl">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-slate-900">My CVs</h2>
+          <Link
+            to="/cv-list"
+            className="inline-flex items-center gap-2 text-primary-600 font-semibold hover:gap-3 transition-all"
+          >
+            View All
+            <ArrowRight className="h-5 w-5" />
+          </Link>
+        </div>
+
+        {cvsLoading ? (
+          <div className="flex justify-center py-8">
+            <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full"></div>
+          </div>
+        ) : cvs.length === 0 ? (
+          <div className="text-center py-12 bg-white/50 rounded-xl">
+            <FileText className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-slate-900 mb-2">No CVs yet</h3>
+            <p className="text-slate-600 mb-6">Create your first professional CV with AI assistance</p>
+            <Link
+              to="/cv-master"
+              className="inline-flex items-center gap-2 btn-primary"
+            >
+              <Plus className="h-5 w-5" />
+              Create First CV
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {cvs.map((cv) => (
+              <div
+                key={cv.id}
+                className="bg-white/50 hover:bg-white rounded-xl p-4 transition-all duration-300 hover:shadow-md group"
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-slate-900 mb-1 group-hover:text-primary-600 transition-colors">
+                      {cv.title}
+                    </h3>
+                    <div className="flex items-center gap-3 text-sm text-slate-600">
+                      <span className="px-2 py-0.5 bg-primary-100 text-primary-700 rounded text-xs font-medium">
+                        {cv.template_key}
+                      </span>
+                      <span>Updated {formatDate(cv.updated_at)}</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Link
+                      to={`/cv-master?id=${cv.id}`}
+                      className="p-2 text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all"
+                      title="View/Edit"
+                    >
+                      <Eye className="h-5 w-5" />
+                    </Link>
+                    <Link
+                      to={`/cv-master?id=${cv.id}`}
+                      className="p-2 text-slate-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all"
+                      title="Edit"
+                    >
+                      <Edit className="h-5 w-5" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Quick Actions */}

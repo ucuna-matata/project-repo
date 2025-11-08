@@ -114,19 +114,29 @@ export async function updateCV(id: string, payload: Record<string, unknown>) {
   return handleResponse(res);
 }
 export async function exportCV(id: string, format: 'pdf' | 'docx') {
-  const res = await fetch(`${API_ORIGIN}/api/cvs/${id}/export/?format=${format}`, {
+  const url = `${API_ORIGIN}/api/cvs/${id}/export/?format=${format}`;
+  console.log(`[API] exportCV: Fetching ${url}`);
+
+  const res = await fetch(url, {
     credentials: 'include',
   });
+
+  console.log(`[API] exportCV: Response status ${res.status}`);
 
   if (!res.ok) {
     const error = new Error('Export failed');
     (error as Error & { status: number }).status = res.status;
+    console.error(`[API] exportCV: Request failed with status ${res.status}`);
     throw error;
   }
 
   // Return blob for download
   const blob = await res.blob();
+  console.log(`[API] exportCV: Blob received, size=${blob.size}, type=${blob.type}`);
+
   const contentDisposition = res.headers.get('Content-Disposition');
+  console.log(`[API] exportCV: Content-Disposition header: ${contentDisposition}`);
+
   let filename = `cv_${Date.now()}.${format}`;
 
   if (contentDisposition) {
@@ -136,6 +146,7 @@ export async function exportCV(id: string, format: 'pdf' | 'docx') {
     }
   }
 
+  console.log(`[API] exportCV: Using filename: ${filename}`);
   return { blob, filename };
 }
 export async function generateCV(payload: Record<string, unknown>, signal?: AbortSignal) {
