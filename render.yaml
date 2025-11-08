@@ -49,12 +49,11 @@ services:
       - key: STORAGE_BACKEND
         value: local
 
-  # React Frontend
+  # React Frontend (Static Site)
   - type: web
     name: hirely-frontend
     env: static
     plan: free
-    region: frankfurt
     buildCommand: |
       cd frontend
       npm install
